@@ -1,49 +1,14 @@
-//--------------------------------------------------------------------------------------
-// File: ShadowTester.cpp
-//
-// Este ejemplo demuestra texturizado y la proyección de sombras planas
-//
-// Modificado para agrandar el plano y desplazar el cubo hacia arriba.
-//--------------------------------------------------------------------------------------
-#include <windows.h>
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dcompiler.h>
-#include <xnamath.h>
-#include "resource.h"
+#include "Prerequisites.h"
+#include "Window.h"
 
-//--------------------------------------------------------------------------------------
-// Estructuras
-//--------------------------------------------------------------------------------------
-struct SimpleVertex
-{
-  XMFLOAT3 Pos;
-  XMFLOAT2 Tex;
-};
-
-struct CBNeverChanges
-{
-  XMMATRIX mView;
-};
-
-struct CBChangeOnResize
-{
-  XMMATRIX mProjection;
-};
-
-struct CBChangesEveryFrame
-{
-  XMMATRIX mWorld;
-  XMFLOAT4 vMeshColor;
-};
-
-
+// Customs
+Window g_window;
 
 //--------------------------------------------------------------------------------------
 // Variables Globales
 //--------------------------------------------------------------------------------------
-HINSTANCE                           g_hInst = NULL;
-HWND                                g_hWnd = NULL;
+//HINSTANCE                           g_hInst = NULL;
+//HWND                                g_hWnd = NULL;
 D3D_DRIVER_TYPE                     g_driverType = D3D_DRIVER_TYPE_NULL;
 D3D_FEATURE_LEVEL                   g_featureLevel = D3D_FEATURE_LEVEL_11_0;
 ID3D11Device*                       g_pd3dDevice = NULL;
@@ -60,6 +25,7 @@ ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
 ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
+
 // Variable global para el constant buffer de la luz puntual
 ID3D11Buffer*                       g_pCBPointLight = NULL;
 ID3D11ShaderResourceView*           g_pTextureRV = NULL;
@@ -82,12 +48,13 @@ XMFLOAT4                            g_LightPos(2.0f, 4.0f, -2.0f, 1.0f); // Posi
 //--------------------------------------------------------------------------------------
 // Declaraciones adelantadas
 //--------------------------------------------------------------------------------------
-HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
+//HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 HRESULT InitDevice();
 void CleanupDevice();
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 void UpdateScene();
 void RenderScene();
+
 //--------------------------------------------------------------------------------------
 // Punto de entrada del programa. Inicializa todo y entra en el bucle de mensajes.
 //--------------------------------------------------------------------------------------
@@ -96,7 +63,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
   UNREFERENCED_PARAMETER(hPrevInstance);
   UNREFERENCED_PARAMETER(lpCmdLine);
 
-  if (FAILED(InitWindow(hInstance, nCmdShow)))
+  if (FAILED(g_window.init(hInstance, nCmdShow, WndProc)))
     return 0;
 
   if (FAILED(InitDevice()))
@@ -131,44 +98,47 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 //--------------------------------------------------------------------------------------
 // Registro de la clase y creación de la ventana
 //--------------------------------------------------------------------------------------
-HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
-{
-  // Registro de la clase
-  WNDCLASSEX wcex;
-  wcex.cbSize = sizeof(WNDCLASSEX);
-  wcex.style = CS_HREDRAW | CS_VREDRAW;
-  wcex.lpfnWndProc = WndProc;
-  wcex.cbClsExtra = 0;
-  wcex.cbWndExtra = 0;
-  wcex.hInstance = hInstance;
-  wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL1);
-  wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-  wcex.lpszMenuName = NULL;
-  wcex.lpszClassName = L"TutorialWindowClass";
-  wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
-  if (!RegisterClassEx(&wcex))
-    return E_FAIL;
-
-  // Creación de la ventana
-  g_hInst = hInstance;
-  RECT rc = { 0, 0, 640, 480 };
-  AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-  g_hWnd = CreateWindow(L"TutorialWindowClass", L"Direct3D 11 Tutorial 7 - Sombras Planas", WS_OVERLAPPEDWINDOW,
-    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
-    NULL);
-  if (!g_hWnd)
-    return E_FAIL;
-
-  ShowWindow(g_hWnd, nCmdShow);
-
-  return S_OK;
-}
+//HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
+//{
+//  // Registro de la clase
+//  WNDCLASSEX wcex;
+//  wcex.cbSize = sizeof(WNDCLASSEX);
+//  wcex.style = CS_HREDRAW | CS_VREDRAW;
+//  wcex.lpfnWndProc = WndProc;
+//  wcex.cbClsExtra = 0;
+//  wcex.cbWndExtra = 0;
+//  wcex.hInstance = hInstance;
+//  wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL1);
+//  wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+//  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+//  wcex.lpszMenuName = NULL;
+//  wcex.lpszClassName = "TutorialWindowClass";
+//  wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
+//  if (!RegisterClassEx(&wcex))
+//    return E_FAIL;
+//
+//  // Creación de la ventana
+//  g_hInst = hInstance;
+//  RECT rc = { 0, 0, 640, 480 };
+//  AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+//  g_hWnd = CreateWindow("TutorialWindowClass", "Direct3D 11 Tutorial 7 - Sombras Planas", WS_OVERLAPPEDWINDOW,
+//    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
+//    NULL);
+//  if (!g_hWnd)
+//    return E_FAIL;
+//
+//  ShowWindow(g_hWnd, nCmdShow);
+//
+//  return S_OK;
+//}
 
 //--------------------------------------------------------------------------------------
 // Función auxiliar para compilar shaders con D3DX11
 //--------------------------------------------------------------------------------------
-HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut)
+HRESULT CompileShaderFromFile(char* szFileName, 
+                              LPCSTR szEntryPoint, 
+                              LPCSTR szShaderModel, 
+                              ID3DBlob** ppBlobOut)
 {
   HRESULT hr = S_OK;
 
@@ -199,10 +169,10 @@ HRESULT InitDevice()
 {
   HRESULT hr = S_OK;
 
-  RECT rc;
-  GetClientRect(g_hWnd, &rc);
-  UINT width = rc.right - rc.left;
-  UINT height = rc.bottom - rc.top;
+  //RECT rc;
+  //GetClientRect(g_hWnd, &rc);
+  //UINT width = rc.right - rc.left;
+  //UINT height = rc.bottom - rc.top;
 
   UINT createDeviceFlags = 0;
 #ifdef _DEBUG
@@ -228,13 +198,13 @@ HRESULT InitDevice()
   DXGI_SWAP_CHAIN_DESC sd;
   ZeroMemory(&sd, sizeof(sd));
   sd.BufferCount = 1;
-  sd.BufferDesc.Width = width;
-  sd.BufferDesc.Height = height;
+  sd.BufferDesc.Width =  g_window.m_width;
+  sd.BufferDesc.Height = g_window.m_height;
   sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   sd.BufferDesc.RefreshRate.Numerator = 60;
   sd.BufferDesc.RefreshRate.Denominator = 1;
   sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  sd.OutputWindow = g_hWnd;
+  sd.OutputWindow = g_window.m_hWnd;
   sd.SampleDesc.Count = 1;
   sd.SampleDesc.Quality = 0;
   sd.Windowed = TRUE;
@@ -264,8 +234,8 @@ HRESULT InitDevice()
   // Crear textura de depth stencil
   D3D11_TEXTURE2D_DESC descDepth;
   ZeroMemory(&descDepth, sizeof(descDepth));
-  descDepth.Width = width;
-  descDepth.Height = height;
+  descDepth.Width =  g_window.m_width;
+  descDepth.Height = g_window.m_height;
   descDepth.MipLevels = 1;
   descDepth.ArraySize = 1;
   descDepth.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -293,8 +263,8 @@ HRESULT InitDevice()
 
   // Configurar el viewport
   D3D11_VIEWPORT vp;
-  vp.Width = (FLOAT)width;
-  vp.Height = (FLOAT)height;
+  vp.Width =  (FLOAT)g_window.m_width;
+  vp.Height = (FLOAT)g_window.m_height;
   vp.MinDepth = 0.0f;
   vp.MaxDepth = 1.0f;
   vp.TopLeftX = 0;
@@ -303,11 +273,11 @@ HRESULT InitDevice()
 
   // Compilar y crear el vertex shader
   ID3DBlob* pVSBlob = NULL;
-  hr = CompileShaderFromFile(L"HybridEngine.fx", "VS", "vs_4_0", &pVSBlob);
+  hr = CompileShaderFromFile("HybridEngine.fx", "VS", "vs_4_0", &pVSBlob);
   if (FAILED(hr))
   {
     MessageBox(NULL,
-      L"El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", L"Error", MB_OK);
+      "El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", "Error", MB_OK);
     return hr;
   }
 
@@ -336,11 +306,11 @@ HRESULT InitDevice()
 
   // Compilar y crear el pixel shader (normal)
   ID3DBlob* pPSBlob = NULL;
-  hr = CompileShaderFromFile(L"HybridEngine.fx", "PS", "ps_4_0", &pPSBlob);
+  hr = CompileShaderFromFile("HybridEngine.fx", "PS", "ps_4_0", &pPSBlob);
   if (FAILED(hr))
   {
     MessageBox(NULL,
-      L"El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", L"Error", MB_OK);
+      "El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", "Error", MB_OK);
     return hr;
   }
 
@@ -457,7 +427,7 @@ HRESULT InitDevice()
     return hr;
 
   // Cargar la textura
-  hr = D3DX11CreateShaderResourceViewFromFile(g_pd3dDevice, L"seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
+  hr = D3DX11CreateShaderResourceViewFromFile(g_pd3dDevice, "seafloor.dds", NULL, NULL, &g_pTextureRV, NULL);
   if (FAILED(hr))
     return hr;
 
@@ -487,7 +457,7 @@ HRESULT InitDevice()
   cbNeverChanges.mView = XMMatrixTranspose(g_View);
   g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges, 0, NULL, &cbNeverChanges, 0, 0);
 
-  g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, width / (FLOAT)height, 0.01f, 100.0f);
+  g_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, g_window.m_width / (FLOAT)g_window.m_height, 0.01f, 100.0f);
 
   CBChangeOnResize cbChangesOnResize;
   cbChangesOnResize.mProjection = XMMatrixTranspose(g_Projection);
@@ -531,11 +501,11 @@ HRESULT InitDevice()
 
   //------- COMPILAR SHADER DE SOMBRA -------//
   ID3DBlob* pShadowPSBlob = NULL;
-  hr = CompileShaderFromFile(L"HybridEngine.fx", "ShadowPS", "ps_4_0", &pShadowPSBlob);
+  hr = CompileShaderFromFile("HybridEngine.fx", "ShadowPS", "ps_4_0", &pShadowPSBlob);
   if (FAILED(hr))
   {
     MessageBox(NULL,
-      L"Error al compilar el ShadowPS.", L"Error", MB_OK);
+      "Error al compilar el ShadowPS.", "Error", MB_OK);
     return hr;
   }
   hr = g_pd3dDevice->CreatePixelShader(pShadowPSBlob->GetBufferPointer(), pShadowPSBlob->GetBufferSize(), NULL, &g_pShadowPixelShader);

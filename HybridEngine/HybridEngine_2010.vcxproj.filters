@@ -1,35 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns:atg="http://atg.xbox.com" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-<ItemGroup>
-<Filter Include="Resource Files">
-<UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
-<Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-</Filter>
-<Filter Include="DXUT">
-<UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
-</Filter>
-<Filter Include="Shaders">
-<UniqueIdentifier>{2c3d4c8c-5d1a-459a-a05a-a4e4b608a44e}</UniqueIdentifier>
-<Extensions>fx;fxh;hlsl</Extensions>
-</Filter>
-</ItemGroup>
-<ItemGroup />
-<ItemGroup>
-      <ClCompile Include="HybridEngine.cpp" />
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="DXUT">
+      <UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{2c3d4c8c-5d1a-459a-a05a-a4e4b608a44e}</UniqueIdentifier>
+      <Extensions>fx;fxh;hlsl</Extensions>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{3d7525f2-a228-45f0-9571-6bd5e2f51e60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{9ed35299-ad08-4415-b63e-d634559ae380}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
-<ItemGroup>
-      <None Include="HybridEngine.fx">
-<Filter>Shaders</Filter>
-</None>
+  <ItemGroup>
+    <ClInclude Include="include\Prerequisites.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Window.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
-<ItemGroup>
-      <CLInclude Include="resource.h">
-<Filter>Resource Files</Filter>
-</CLInclude>
-      <ResourceCompile Include="HybridEngine.rc">
-<Filter>Resource Files</Filter>
-</ResourceCompile>
+  <ItemGroup>
+    <ClCompile Include="HybridEngine.cpp" />
+    <ClCompile Include="src\Window.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
-<ItemGroup>
-</ItemGroup>
+  <ItemGroup>
+    <None Include="HybridEngine.fx">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CLInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </CLInclude>
+    <ResourceCompile Include="HybridEngine.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
 </Project>
