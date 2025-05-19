@@ -61,7 +61,7 @@ Window::init(HINSTANCE hInstance, int nCmdShow, WNDPROC wndproc) {
 	return S_OK;
 }
 
-void 
+void
 Window::update() {
 }
 
@@ -72,3 +72,4 @@ Window::render() {
 void 
 Window::destroy() {
 }
+

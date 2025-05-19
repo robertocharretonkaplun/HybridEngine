@@ -424,12 +424,16 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
+    <ClCompile Include="src\BaseApp.cpp" />
+    <ClCompile Include="src\Device.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HybridEngine.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\BaseApp.h" />
+    <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\Prerequisites.h" />
     <ClInclude Include="include\Window.h" />
     <CLInclude Include="resource.h" />
