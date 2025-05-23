@@ -426,6 +426,7 @@
     <ClCompile Include="HybridEngine.cpp" />
     <ClCompile Include="src\BaseApp.cpp" />
     <ClCompile Include="src\Device.cpp" />
+    <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -434,7 +435,10 @@
   <ItemGroup>
     <ClInclude Include="include\BaseApp.h" />
     <ClInclude Include="include\Device.h" />
+    <ClInclude Include="include\DeviceContext.h" />
     <ClInclude Include="include\Prerequisites.h" />
+    <ClInclude Include="include\SwapChain.h" />
+    <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\Window.h" />
     <CLInclude Include="resource.h" />
     <ResourceCompile Include="HybridEngine.rc" />

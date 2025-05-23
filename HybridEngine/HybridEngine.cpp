@@ -525,7 +525,7 @@ HRESULT InitDevice()
   blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
   blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
   blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-  hr = g_device.m_device->CreateBlendState(&blendDesc, &g_pShadowBlendState);
+  hr = g_device.CreateBlendState(&blendDesc, &g_pShadowBlendState);
   if (FAILED(hr))
     return hr;
 
@@ -535,7 +535,7 @@ HRESULT InitDevice()
   dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // Deshabilitar escritura en depth
   dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
   dsDesc.StencilEnable = FALSE;
-  hr = g_device.m_device->CreateDepthStencilState(&dsDesc, &g_pShadowDepthStencilState);
+  hr = g_device.CreateDepthStencilState(&dsDesc, &g_pShadowDepthStencilState);
   if (FAILED(hr))
     return hr;
 

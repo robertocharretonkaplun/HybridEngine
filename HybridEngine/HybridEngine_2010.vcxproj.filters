@@ -32,6 +32,15 @@
     <ClInclude Include="include\Device.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\SwapChain.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DeviceContext.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Texture.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -42,6 +51,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\Device.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SwapChain.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -69,6 +69,10 @@ public:
 	HRESULT 
 	CreateDepthStencilState(const D3D11_DEPTH_STENCIL_DESC* pDepthStencilDesc,
 													ID3D11DepthStencilState** ppDepthStencilState);
+
+	HRESULT
+	CreateRasterizerState(const D3D11_RASTERIZER_DESC* pRasterizerDesc,
+												ID3D11RasterizerState** ppRasterizerState);
 public:
 	ID3D11Device* m_device = nullptr;
 };
