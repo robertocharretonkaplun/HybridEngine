@@ -134,3 +134,35 @@ SwapChain::init(Device& device,
 
 	return S_OK;
 }
+
+
+void 
+SwapChain::destroy() {
+  if (m_swapChain) {
+		SAFE_RELEASE(m_swapChain);
+  }
+  if (m_dxgiDevice) {
+    SAFE_RELEASE(m_dxgiDevice);
+  }
+  if (m_dxgiAdapter) {
+    SAFE_RELEASE(m_dxgiAdapter);
+	}
+  if (m_dxgiFactory) {
+    SAFE_RELEASE(m_dxgiFactory);
+  }
+}
+
+void 
+SwapChain::present() {
+  if (m_swapChain) {
+    HRESULT hr = m_swapChain->Present(0, 0);
+    if (FAILED(hr)) {
+      ERROR("SwapChain", "present", 
+        ("Failed to present swap chain. HRESULT: " + std::to_string(hr)).c_str());
+    }
+  } else {
+    ERROR("SwapChain", "present", "Swap chain is not initialized.");
+	}
+}
+
+

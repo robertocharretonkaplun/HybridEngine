@@ -16,8 +16,8 @@ public:
 	void 
 	render();
 	
-	void 
-	destroy();
+	void
+		destroy();
 
 public:
 	// This variable is in charge of handle a texture resource as data
