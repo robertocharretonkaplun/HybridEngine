@@ -41,6 +41,12 @@
     <ClInclude Include="include\Texture.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\RenderTargetView.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DepthStencilView.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -54,6 +60,15 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\SwapChain.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RenderTargetView.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DepthStencilView.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Texture.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

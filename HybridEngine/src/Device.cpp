@@ -36,8 +36,8 @@ Device::CreateRenderTargetView(ID3D11Resource* pResource,
 
 HRESULT
 Device::CreateTexture2D(const D3D11_TEXTURE2D_DESC* pDesc,
-	const D3D11_SUBRESOURCE_DATA* pInitialData,
-	ID3D11Texture2D** ppTexture2D) {
+												const D3D11_SUBRESOURCE_DATA* pInitialData,
+												ID3D11Texture2D** ppTexture2D) {
 	// Validar parametros de entrada
 	if (!pDesc) {
 		ERROR("Device", "CreateTexture2D", "pDesc is nullptr");
