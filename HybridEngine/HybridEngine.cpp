@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "RenderTargetView.h"
 #include "DepthStencilView.h"
+#include "Viewport.h"
 
 // Customs
 Window g_window;
@@ -16,6 +17,7 @@ Texture g_backBuffer;
 RenderTargetView g_renderTargetView;
 Texture g_depthStencil;
 DepthStencilView g_depthStencilView;
+Viewport viewport;
 
 //--------------------------------------------------------------------------------------
 // Variables Globales
@@ -223,17 +225,15 @@ HRESULT InitDevice()
       ("Failed to initialize DepthStencilView. HRESULT: " + std::to_string(hr)).c_str());
     return hr;
   }
-  //g_deviceContext.m_deviceContext->OMSetRenderTargets(1, &g_pRenderTargetView, g_pDepthStencilView);
 
-  // Configurar el viewport
-  D3D11_VIEWPORT vp;
-  vp.Width =  (FLOAT)g_window.m_width;
-  vp.Height = (FLOAT)g_window.m_height;
-  vp.MinDepth = 0.0f;
-  vp.MaxDepth = 1.0f;
-  vp.TopLeftX = 0;
-  vp.TopLeftY = 0;
-  g_deviceContext.m_deviceContext->RSSetViewports(1, &vp);
+	// Crear el viewport
+	hr = viewport.init(g_window);
+  
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize Viewport. HRESULT: " + std::to_string(hr)).c_str());
+    return hr;
+	}
 
   // Compilar y crear el vertex shader
   ID3DBlob* pVSBlob = NULL;
@@ -636,8 +636,9 @@ void RenderScene()
   float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
   g_renderTargetView.render(g_deviceContext, g_depthStencilView, 1, ClearColor);
   g_depthStencilView.render(g_deviceContext);
-  //g_deviceContext.m_deviceContext->ClearRenderTargetView(g_pRenderTargetView, ClearColor);
-  //g_deviceContext.m_deviceContext->ClearDepthStencilView(g_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+  
+  // Set Viewport
+	viewport.render(g_deviceContext);
 
   UINT stride = sizeof(SimpleVertex);
   UINT offset = 0;

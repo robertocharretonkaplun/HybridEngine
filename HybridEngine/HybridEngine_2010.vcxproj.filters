@@ -47,6 +47,9 @@
     <ClInclude Include="include\DepthStencilView.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Viewport.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -69,6 +72,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\Texture.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Viewport.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DeviceContext.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
