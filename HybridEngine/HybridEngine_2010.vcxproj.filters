@@ -50,6 +50,12 @@
     <ClInclude Include="include\Viewport.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\ShaderProgram.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\InputLayout.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -78,6 +84,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\DeviceContext.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputLayout.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShaderProgram.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -40,7 +40,7 @@ public:
 public:
   ID3D11VertexShader* m_VertexShader = nullptr;
   ID3D11PixelShader* m_PixelShader = nullptr;
-  //InputLayout m_inputLayout;
+  InputLayout m_inputLayout;
 private:
   std::string m_shaderFileName;
   ID3DBlob* m_vertexShaderData = nullptr;
