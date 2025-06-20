@@ -24,6 +24,6 @@ public:
   void 
   destroy();
 
-private:
+public:
 	ID3D11InputLayout* m_inputLayout = nullptr;
 };

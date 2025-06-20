@@ -7,6 +7,8 @@
 #include "RenderTargetView.h"
 #include "DepthStencilView.h"
 #include "Viewport.h"
+#include "InputLayout.h"
+#include "ShaderProgram.h"
 
 // Customs
 Window g_window;
@@ -17,7 +19,9 @@ Texture g_backBuffer;
 RenderTargetView g_renderTargetView;
 Texture g_depthStencil;
 DepthStencilView g_depthStencilView;
-Viewport viewport;
+Viewport g_viewport;
+ShaderProgram g_shaderProgram;
+ShaderProgram g_shaderShadow;
 
 //--------------------------------------------------------------------------------------
 // Variables Globales
@@ -32,9 +36,9 @@ Viewport viewport;
 //ID3D11RenderTargetView*             g_pRenderTargetView = NULL;
 //ID3D11Texture2D*                    g_pDepthStencil = NULL;
 //ID3D11DepthStencilView*             g_pDepthStencilView = NULL;
-ID3D11VertexShader*                 g_pVertexShader = NULL;
-ID3D11PixelShader*                  g_pPixelShader = NULL;
-ID3D11InputLayout*                  g_pVertexLayout = NULL;
+//ID3D11VertexShader*                 g_pVertexShader = NULL;
+//ID3D11PixelShader*                  g_pPixelShader = NULL;
+//ID3D11InputLayout*                  g_pVertexLayout = NULL;
 ID3D11Buffer*                       g_pVertexBuffer = NULL;
 ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
@@ -55,7 +59,7 @@ XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 ID3D11Buffer*                       g_pPlaneVertexBuffer = NULL;
 ID3D11Buffer*                       g_pPlaneIndexBuffer = NULL;
 UINT                                g_planeIndexCount = 0;
-ID3D11PixelShader*                  g_pShadowPixelShader = NULL;
+//ID3D11PixelShader*                  g_pShadowPixelShader = NULL;
 ID3D11BlendState*                   g_pShadowBlendState = NULL;
 ID3D11DepthStencilState*            g_pShadowDepthStencilState = NULL;
 XMFLOAT4                            g_LightPos(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
@@ -110,72 +114,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
   return (int)msg.wParam;
 }
 
-//--------------------------------------------------------------------------------------
-// Registro de la clase y creación de la ventana
-//--------------------------------------------------------------------------------------
-//HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow)
-//{
-//  // Registro de la clase
-//  WNDCLASSEX wcex;
-//  wcex.cbSize = sizeof(WNDCLASSEX);
-//  wcex.style = CS_HREDRAW | CS_VREDRAW;
-//  wcex.lpfnWndProc = WndProc;
-//  wcex.cbClsExtra = 0;
-//  wcex.cbWndExtra = 0;
-//  wcex.hInstance = hInstance;
-//  wcex.hIcon = LoadIcon(hInstance, (LPCTSTR)IDI_TUTORIAL1);
-//  wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-//  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-//  wcex.lpszMenuName = NULL;
-//  wcex.lpszClassName = "TutorialWindowClass";
-//  wcex.hIconSm = LoadIcon(wcex.hInstance, (LPCTSTR)IDI_TUTORIAL1);
-//  if (!RegisterClassEx(&wcex))
-//    return E_FAIL;
-//
-//  // Creación de la ventana
-//  g_hInst = hInstance;
-//  RECT rc = { 0, 0, 640, 480 };
-//  AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
-//  g_hWnd = CreateWindow("TutorialWindowClass", "Direct3D 11 Tutorial 7 - Sombras Planas", WS_OVERLAPPEDWINDOW,
-//    CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance,
-//    NULL);
-//  if (!g_hWnd)
-//    return E_FAIL;
-//
-//  ShowWindow(g_hWnd, nCmdShow);
-//
-//  return S_OK;
-//}
 
-//--------------------------------------------------------------------------------------
-// Función auxiliar para compilar shaders con D3DX11
-//--------------------------------------------------------------------------------------
-HRESULT CompileShaderFromFile(char* szFileName, 
-                              LPCSTR szEntryPoint, 
-                              LPCSTR szShaderModel, 
-                              ID3DBlob** ppBlobOut)
-{
-  HRESULT hr = S_OK;
-
-  DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
-#if defined( DEBUG ) || defined( _DEBUG )
-  dwShaderFlags |= D3DCOMPILE_DEBUG;
-#endif
-
-  ID3DBlob* pErrorBlob;
-  hr = D3DX11CompileFromFile(szFileName, NULL, NULL, szEntryPoint, szShaderModel,
-    dwShaderFlags, 0, NULL, ppBlobOut, &pErrorBlob, NULL);
-  if (FAILED(hr))
-  {
-    if (pErrorBlob != NULL)
-      OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
-    if (pErrorBlob) pErrorBlob->Release();
-    return hr;
-  }
-  if (pErrorBlob) pErrorBlob->Release();
-
-  return S_OK;
-}
 
 //--------------------------------------------------------------------------------------
 // Creación del dispositivo Direct3D y swap chain
@@ -226,8 +165,8 @@ HRESULT InitDevice()
     return hr;
   }
 
-	// Crear el viewport
-	hr = viewport.init(g_window);
+	// Crear el g_viewport
+	hr = g_viewport.init(g_window);
   
   if (FAILED(hr)) {
     ERROR("Main", "InitDevice",
@@ -235,53 +174,37 @@ HRESULT InitDevice()
     return hr;
 	}
 
-  // Compilar y crear el vertex shader
-  ID3DBlob* pVSBlob = NULL;
-  hr = CompileShaderFromFile("HybridEngine.fx", "VS", "vs_4_0", &pVSBlob);
-  if (FAILED(hr))
-  {
-    MessageBox(NULL,
-      "El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", "Error", MB_OK);
-    return hr;
-  }
-
-  hr = g_device.CreateVertexShader(pVSBlob->GetBufferPointer(), pVSBlob->GetBufferSize(), NULL, &g_pVertexShader);
-  if (FAILED(hr))
-  {
-    pVSBlob->Release();
-    return hr;
-  }
-
   // Definir el layout de entrada
-  D3D11_INPUT_ELEMENT_DESC layout[] =
-  {
-      { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-  };
-  UINT numElements = ARRAYSIZE(layout);
+  std::vector<D3D11_INPUT_ELEMENT_DESC> Layout;
 
-  hr = g_device.CreateInputLayout(layout, numElements, pVSBlob->GetBufferPointer(),
-    pVSBlob->GetBufferSize(), &g_pVertexLayout);
-  pVSBlob->Release();
-  if (FAILED(hr))
-    return hr;
+  D3D11_INPUT_ELEMENT_DESC position;
+  position.SemanticName = "POSITION";
+  position.SemanticIndex = 0;
+  position.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+  position.InputSlot = 0;
+  position.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT /*0*/;
+  position.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+  position.InstanceDataStepRate = 0;
+  Layout.push_back(position);
 
-  g_deviceContext.m_deviceContext->IASetInputLayout(g_pVertexLayout);
+  D3D11_INPUT_ELEMENT_DESC texcoord;
+  texcoord.SemanticName = "TEXCOORD";
+  texcoord.SemanticIndex = 0;
+  texcoord.Format = DXGI_FORMAT_R32G32_FLOAT;
+  texcoord.InputSlot = 0;
+  texcoord.AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT /*12*/;
+  texcoord.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+  texcoord.InstanceDataStepRate = 0;
+  Layout.push_back(texcoord);
 
-  // Compilar y crear el pixel shader (normal)
-  ID3DBlob* pPSBlob = NULL;
-  hr = CompileShaderFromFile("HybridEngine.fx", "PS", "ps_4_0", &pPSBlob);
-  if (FAILED(hr))
-  {
-    MessageBox(NULL,
-      "El archivo FX no se pudo compilar. Ejecuta el ejecutable desde el directorio que contiene el archivo FX.", "Error", MB_OK);
+  // Create the Shader Program
+  hr = g_shaderProgram.init(g_device, "HybridEngine.fx", Layout);
+
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize ShaderProgram. HRESULT: " + std::to_string(hr)).c_str());
     return hr;
   }
-
-  hr = g_device.CreatePixelShader(pPSBlob->GetBufferPointer(), pPSBlob->GetBufferSize(), NULL, &g_pPixelShader);
-  pPSBlob->Release();
-  if (FAILED(hr))
-    return hr;
 
   // Crear vertex buffer y index buffer para el cubo
   SimpleVertex vertices[] =
@@ -464,19 +387,13 @@ HRESULT InitDevice()
     return hr;
 
   //------- COMPILAR SHADER DE SOMBRA -------//
-  ID3DBlob* pShadowPSBlob = NULL;
-  hr = CompileShaderFromFile("HybridEngine.fx", "ShadowPS", "ps_4_0", &pShadowPSBlob);
-  if (FAILED(hr))
-  {
-    MessageBox(NULL,
-      "Error al compilar el ShadowPS.", "Error", MB_OK);
-    return hr;
-  }
-  hr = g_device.CreatePixelShader(pShadowPSBlob->GetBufferPointer(), pShadowPSBlob->GetBufferSize(), NULL, &g_pShadowPixelShader);
-  pShadowPSBlob->Release();
-  if (FAILED(hr))
-    return hr;
+	hr = g_shaderShadow.CreateShader(g_device, PIXEL_SHADER ,"HybridEngine.fx");
 
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize Shadow Shader. HRESULT: " + std::to_string(hr)).c_str());
+    return hr;
+	}
   //------- CREAR ESTADOS DE BLENDING Y DEPTH STENCIL PARA LAS SOMBRAS -------//
   D3D11_BLEND_DESC blendDesc;
   ZeroMemory(&blendDesc, sizeof(blendDesc));
@@ -514,7 +431,7 @@ void CleanupDevice()
 
   if (g_pShadowBlendState) g_pShadowBlendState->Release();
   if (g_pShadowDepthStencilState) g_pShadowDepthStencilState->Release();
-  if (g_pShadowPixelShader) g_pShadowPixelShader->Release();
+  g_shaderShadow.destroy();
   if (g_pPlaneVertexBuffer) g_pPlaneVertexBuffer->Release();
   if (g_pPlaneIndexBuffer) g_pPlaneIndexBuffer->Release();
   if (g_pSamplerLinear) g_pSamplerLinear->Release();
@@ -524,18 +441,12 @@ void CleanupDevice()
   if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
   if (g_pVertexBuffer) g_pVertexBuffer->Release();
   if (g_pIndexBuffer) g_pIndexBuffer->Release();
-  if (g_pVertexLayout) g_pVertexLayout->Release();
-  if (g_pVertexShader) g_pVertexShader->Release();
-  if (g_pPixelShader) g_pPixelShader->Release();
-  //if (g_pDepthStencil) g_pDepthStencil->Release();
+
+  g_shaderProgram.destroy();
   g_depthStencil.destroy();
-  //if (g_pDepthStencilView) g_pDepthStencilView->Release();
   g_depthStencilView.destroy();
   g_renderTargetView.destroy();
-  //if (g_pRenderTargetView) g_pRenderTargetView->Release();
-  //g_backBuffer.destroy();
   g_swapChain.destroy();
-  //if (g_pSwapChain) g_pSwapChain->Release();
   if (g_deviceContext.m_deviceContext) g_deviceContext.m_deviceContext->Release();
   if (g_device.m_device) g_device.m_device->Release();
 }
@@ -635,10 +546,15 @@ void RenderScene()
   // Limpiar el back buffer y el depth buffer
   float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
   g_renderTargetView.render(g_deviceContext, g_depthStencilView, 1, ClearColor);
-  g_depthStencilView.render(g_deviceContext);
   
   // Set Viewport
-	viewport.render(g_deviceContext);
+	g_viewport.render(g_deviceContext);
+
+  g_depthStencilView.render(g_deviceContext);
+  
+  // Configurar los buffers y shaders para el pipeline
+  g_shaderProgram.render(g_deviceContext);
+
 
   UINT stride = sizeof(SimpleVertex);
   UINT offset = 0;
@@ -655,11 +571,11 @@ void RenderScene()
   g_deviceContext.m_deviceContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cbPlane, 0, 0);
   // ... Continuar con el renderizado (setear shaders, constantes, etc.)
 
-  g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
-  g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
   g_deviceContext.m_deviceContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
   g_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &g_pTextureRV);
   g_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
@@ -672,11 +588,11 @@ void RenderScene()
   g_deviceContext.m_deviceContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
   g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
   g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
-  g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
-  g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
   g_deviceContext.m_deviceContext->PSSetConstantBuffers(2, 1, &g_pCBChangesEveryFrame);
   g_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &g_pTextureRV);
   g_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &g_pSamplerLinear);
@@ -695,7 +611,8 @@ void RenderScene()
   cbShadow.mWorld = XMMatrixTranspose(shadowWorld);
   cbShadow.vMeshColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
   g_deviceContext.m_deviceContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cbShadow, 0, 0);
-  g_deviceContext.m_deviceContext->PSSetShader(g_pShadowPixelShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->PSSetShader(g_pShadowPixelShader, NULL, 0);
+	g_shaderShadow.render(g_deviceContext, PIXEL_SHADER);
   float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
   g_deviceContext.m_deviceContext->OMSetBlendState(g_pShadowBlendState, blendFactor, 0xffffffff);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(g_pShadowDepthStencilState, 0);
@@ -704,7 +621,8 @@ void RenderScene()
   g_deviceContext.m_deviceContext->DrawIndexed(36, 0, 0);
   g_deviceContext.m_deviceContext->OMSetBlendState(NULL, blendFactor, 0xffffffff);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(NULL, 0);
-  g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
+  //g_deviceContext.m_deviceContext->PSSetShader(g_pPixelShader, NULL, 0);
+	g_shaderShadow.render(g_deviceContext, PIXEL_SHADER);
 
   // Presentar el back buffer al front buffer
   g_swapChain.present();

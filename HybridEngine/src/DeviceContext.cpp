@@ -3,7 +3,7 @@
 void 
 DeviceContext::RSSetViewports(unsigned int NumViewports, 
 															const D3D11_VIEWPORT* pViewports) {
-	if (NumViewports > 0 && pViewports != nullptr) {
+	if (NumViewports < 0 && pViewports != nullptr) {
 		ERROR("DeviceContext", "RSSetViewports", "pViewports is nullptr");
 	}
 	// Set the Viewport
