@@ -219,6 +219,10 @@ ShaderProgram::render(DeviceContext& deviceContext) {
 
 void
 ShaderProgram::render(DeviceContext& deviceContext, ShaderType type) {
+	if (!deviceContext.m_deviceContext) {
+		ERROR("RenderTargetView", "render", "DeviceContext is nullptr.");
+		return;
+	}
 	switch (type)	{
 	case VERTEX_SHADER:
 		deviceContext.m_deviceContext->VSSetShader(m_VertexShader, nullptr, 0);

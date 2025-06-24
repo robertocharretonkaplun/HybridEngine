@@ -9,6 +9,8 @@
 #include "Viewport.h"
 #include "InputLayout.h"
 #include "ShaderProgram.h"
+#include "Buffer.h"
+#include "MeshComponent.h"
 
 // Customs
 Window g_window;
@@ -22,6 +24,8 @@ DepthStencilView g_depthStencilView;
 Viewport g_viewport;
 ShaderProgram g_shaderProgram;
 ShaderProgram g_shaderShadow;
+Buffer m_vertexBuffer;
+Buffer m_indexBuffer;
 
 //--------------------------------------------------------------------------------------
 // Variables Globales
@@ -39,8 +43,9 @@ ShaderProgram g_shaderShadow;
 //ID3D11VertexShader*                 g_pVertexShader = NULL;
 //ID3D11PixelShader*                  g_pPixelShader = NULL;
 //ID3D11InputLayout*                  g_pVertexLayout = NULL;
-ID3D11Buffer*                       g_pVertexBuffer = NULL;
-ID3D11Buffer*                       g_pIndexBuffer = NULL;
+
+//ID3D11Buffer*                       g_pVertexBuffer = NULL;
+//ID3D11Buffer*                       g_pIndexBuffer = NULL;
 ID3D11Buffer*                       g_pCBNeverChanges = NULL;
 ID3D11Buffer*                       g_pCBChangeOnResize = NULL;
 ID3D11Buffer*                       g_pCBChangesEveryFrame = NULL;
@@ -63,6 +68,8 @@ UINT                                g_planeIndexCount = 0;
 ID3D11BlendState*                   g_pShadowBlendState = NULL;
 ID3D11DepthStencilState*            g_pShadowDepthStencilState = NULL;
 XMFLOAT4                            g_LightPos(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
+
+MeshComponent cubeMesh;
 
 //--------------------------------------------------------------------------------------
 // Declaraciones adelantadas
@@ -207,8 +214,7 @@ HRESULT InitDevice()
   }
 
   // Crear vertex buffer y index buffer para el cubo
-  SimpleVertex vertices[] =
-  {
+  SimpleVertex vertices[] =  {
       { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
       { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
       { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
@@ -239,28 +245,7 @@ HRESULT InitDevice()
       { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
       { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
   };
-
-  D3D11_BUFFER_DESC bd;
-  ZeroMemory(&bd, sizeof(bd));
-  bd.Usage = D3D11_USAGE_DEFAULT;
-  bd.ByteWidth = sizeof(SimpleVertex) * 24;
-  bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  bd.CPUAccessFlags = 0;
-  D3D11_SUBRESOURCE_DATA InitData;
-  ZeroMemory(&InitData, sizeof(InitData));
-  InitData.pSysMem = vertices;
-  hr = g_device.CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
-  if (FAILED(hr))
-    return hr;
-
-  // Configurar el vertex buffer para el cubo
-  UINT stride = sizeof(SimpleVertex);
-  UINT offset = 0;
-  g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
-
-  // Crear index buffer para el cubo
-  WORD indices[] =
-  {
+  unsigned int indices[] =  {
       3,1,0,
       2,1,3,
 
@@ -280,16 +265,61 @@ HRESULT InitDevice()
       23,20,22
   };
 
-  bd.Usage = D3D11_USAGE_DEFAULT;
-  bd.ByteWidth = sizeof(WORD) * 36;
-  bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  bd.CPUAccessFlags = 0;
-  InitData.pSysMem = indices;
-  hr = g_device.CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
-  if (FAILED(hr))
-    return hr;
+  // Store the vertex data
+  for (int i = 0; i < 24; i++) {
+		cubeMesh.m_vertex.push_back(vertices[i]);
+  }
+	// Store the index data
+	for (int i = 0; i < 36; i++) {
+    cubeMesh.m_index.push_back(indices[i]);
+	}
 
-  g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+  hr = m_vertexBuffer.init(g_device, cubeMesh, D3D11_BIND_VERTEX_BUFFER);
+
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize VertexBuffer. HRESULT: " + std::to_string(hr)).c_str());
+    return hr;
+	}
+
+  hr = m_indexBuffer.init(g_device, cubeMesh, D3D11_BIND_INDEX_BUFFER);
+
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize IndexBuffer. HRESULT: " + std::to_string(hr)).c_str());
+    return hr;
+  }
+
+  D3D11_BUFFER_DESC bd;
+  ZeroMemory(&bd, sizeof(bd));
+  //bd.Usage = D3D11_USAGE_DEFAULT;
+  //bd.ByteWidth = sizeof(SimpleVertex) * 24;
+  //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+  //bd.CPUAccessFlags = 0;
+  D3D11_SUBRESOURCE_DATA InitData;
+  ZeroMemory(&InitData, sizeof(InitData));
+  //InitData.pSysMem = vertices;
+  //hr = g_device.CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
+  //if (FAILED(hr))
+  //  return hr;
+
+  // Configurar el vertex buffer para el cubo
+  //UINT stride = sizeof(SimpleVertex);
+  //UINT offset = 0;
+  //g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+  // 
+  // Crear index buffer para el cubo
+
+  //bd.Usage = D3D11_USAGE_DEFAULT;
+  //bd.ByteWidth = sizeof(WORD) * 36;
+  //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+  //bd.CPUAccessFlags = 0;
+  //InitData.pSysMem = indices;
+  //hr = g_device.CreateBuffer(&bd, &InitData, &g_pIndexBuffer);
+  //if (FAILED(hr))
+  //  return hr;
+
+  //g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
   // Establecer topología primitiva
   g_deviceContext.m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -439,9 +469,10 @@ void CleanupDevice()
   if (g_pCBNeverChanges) g_pCBNeverChanges->Release();
   if (g_pCBChangeOnResize) g_pCBChangeOnResize->Release();
   if (g_pCBChangesEveryFrame) g_pCBChangesEveryFrame->Release();
-  if (g_pVertexBuffer) g_pVertexBuffer->Release();
-  if (g_pIndexBuffer) g_pIndexBuffer->Release();
-
+  //if (g_pVertexBuffer) g_pVertexBuffer->Release();
+  //if (g_pIndexBuffer) g_pIndexBuffer->Release();
+  m_vertexBuffer.destroy();
+  m_indexBuffer.destroy();
   g_shaderProgram.destroy();
   g_depthStencil.destroy();
   g_depthStencilView.destroy();
@@ -586,8 +617,13 @@ void RenderScene()
   cb.mWorld = XMMatrixTranspose(g_World);
   cb.vMeshColor = g_vMeshColor;
   g_deviceContext.m_deviceContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
-  g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
-  g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+
+	m_vertexBuffer.render(g_deviceContext, 0, 1);
+
+  //g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+  //g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+  m_indexBuffer.render(g_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
+
   //g_deviceContext.m_deviceContext->VSSetShader(g_pVertexShader, NULL, 0);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(0, 1, &g_pCBNeverChanges);
   g_deviceContext.m_deviceContext->VSSetConstantBuffers(1, 1, &g_pCBChangeOnResize);
@@ -616,8 +652,14 @@ void RenderScene()
   float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
   g_deviceContext.m_deviceContext->OMSetBlendState(g_pShadowBlendState, blendFactor, 0xffffffff);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(g_pShadowDepthStencilState, 0);
-  g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
-  g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+  
+  m_vertexBuffer.render(g_deviceContext, 0, 1);
+
+  //g_deviceContext.m_deviceContext->IASetVertexBuffers(0, 1, &g_pVertexBuffer, &stride, &offset);
+  
+  m_indexBuffer.render(g_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
+
+  //g_deviceContext.m_deviceContext->IASetIndexBuffer(g_pIndexBuffer, DXGI_FORMAT_R16_UINT, 0);
   g_deviceContext.m_deviceContext->DrawIndexed(36, 0, 0);
   g_deviceContext.m_deviceContext->OMSetBlendState(NULL, blendFactor, 0xffffffff);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(NULL, 0);

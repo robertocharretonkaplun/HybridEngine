@@ -62,7 +62,74 @@ Buffer::init(Device& device, unsigned int ByteWidth) {
 	return createBuffer(device, desc, nullptr);
 }
 
-HRESULT 
+void 
+Buffer::update(DeviceContext& deviceContext, 
+							 ID3D11Resource* pDstResource,
+							 unsigned int DstSubresource, 
+							 const D3D11_BOX* pDstBox, 
+							 const void* pSrcData, 
+							 unsigned int SrcRowPitch, 
+							 unsigned int SrcDepthPitch) {
+	if (!m_buffer) {
+		ERROR("ShaderProgram", "update", "m_buffer is null.");
+		return;
+	}
+	if (!pSrcData) {
+		ERROR("ShaderProgram", "update", "pSrcData is null.");
+		return;
+	}
+	deviceContext.m_deviceContext->UpdateSubresource(m_buffer, 
+																									 DstSubresource, 
+																									 pDstBox, 
+																									 pSrcData, 
+																									 SrcRowPitch, 
+																									 SrcDepthPitch);
+
+
+}
+
+void 
+Buffer::render(DeviceContext& deviceContext, 
+							 unsigned int StartSlot, 
+							 unsigned int NumBuffers, 
+							 bool setPixelShader, 
+							 DXGI_FORMAT format) {
+	if (!deviceContext.m_deviceContext) {
+		ERROR("RenderTargetView", "render", "DeviceContext is nullptr.");
+		return;
+	}
+	if (!m_buffer) {
+		ERROR("Buffer", "render", "m_buffer is null.");
+		return;
+	}
+
+	switch (m_bindFlag) {
+	case D3D11_BIND_VERTEX_BUFFER:
+		deviceContext.m_deviceContext->IASetVertexBuffers(StartSlot, NumBuffers, &m_buffer, &m_stride, &m_offset);
+		break;
+	case D3D11_BIND_CONSTANT_BUFFER:
+		deviceContext.m_deviceContext->VSSetConstantBuffers(StartSlot, NumBuffers, &m_buffer);
+		if (setPixelShader) {
+			deviceContext.m_deviceContext->PSSetConstantBuffers(StartSlot, NumBuffers, &m_buffer);
+		}
+		break;
+	case D3D11_BIND_INDEX_BUFFER:
+		deviceContext.m_deviceContext->IASetIndexBuffer(m_buffer, format, m_offset);
+		break;
+	default:
+		ERROR("Buffer", "render", "Unsupported BindFlag");
+		break;
+	}
+
+}
+
+void 
+Buffer::destroy() {
+	SAFE_RELEASE(m_buffer);
+}
+
+
+HRESULT
 Buffer::createBuffer(Device& device, 
 										 D3D11_BUFFER_DESC& desc, 
 										 D3D11_SUBRESOURCE_DATA* initData) {
