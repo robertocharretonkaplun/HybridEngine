@@ -11,6 +11,7 @@
 #include "ShaderProgram.h"
 #include "Buffer.h"
 #include "MeshComponent.h"
+#include "BlendState.h"
 
 // Customs
 Window g_window;
@@ -24,6 +25,7 @@ DepthStencilView g_depthStencilView;
 Viewport g_viewport;
 ShaderProgram g_shaderProgram;
 ShaderProgram g_shaderShadow;
+BlendState g_shadowBlendState;
 
 // Camera Buffers
 Buffer m_neverChanges;
@@ -43,7 +45,6 @@ Buffer m_planeIndexBuffer;
 Buffer m_constPlane;
 
 // Variable global para el constant buffer de la luz puntual
-ID3D11Buffer*                       g_pCBPointLight = NULL;
 ID3D11ShaderResourceView*           g_pTextureRV = NULL;
 ID3D11SamplerState*                 g_pSamplerLinear = NULL;
 XMMATRIX                            g_World;         // Para el cubo
@@ -54,9 +55,10 @@ XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 //----- Variables agregadas para el plano y sombras -----//
 UINT                                g_planeIndexCount = 0;
-ID3D11BlendState*                   g_pShadowBlendState = NULL;
+//ID3D11BlendState*                   g_pShadowBlendState = NULL;
 ID3D11DepthStencilState*            g_pShadowDepthStencilState = NULL;
 XMFLOAT4                            g_LightPos(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
+
 float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 MeshComponent cubeMesh;
@@ -307,7 +309,6 @@ HRESULT InitDevice()
 	hr = m_changeEveryFrame.init(g_device, sizeof(CBChangesEveryFrame));
   if (FAILED(hr)) {
     ERROR("Main", "InitDevice",
-
       ("Failed to initialize ChangesEveryFrame Buffer. HRESULT: " + std::to_string(hr)).c_str());
     return hr;
 	}
@@ -430,19 +431,25 @@ HRESULT InitDevice()
     return hr;
   }
   //------- CREAR ESTADOS DE BLENDING Y DEPTH STENCIL PARA LAS SOMBRAS -------//
-  D3D11_BLEND_DESC blendDesc;
-  ZeroMemory(&blendDesc, sizeof(blendDesc));
-  blendDesc.RenderTarget[0].BlendEnable = TRUE;
-  blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-  blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-  blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-  blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-  blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-  blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-  blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-  hr = g_device.CreateBlendState(&blendDesc, &g_pShadowBlendState);
-  if (FAILED(hr))
-    return hr;
+	hr = g_shadowBlendState.init(g_device);
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize Shadow Blend State. HRESULT: " + std::to_string(hr)).c_str());
+		return hr;
+	}
+  //D3D11_BLEND_DESC blendDesc;
+  //ZeroMemory(&blendDesc, sizeof(blendDesc));
+  //blendDesc.RenderTarget[0].BlendEnable = TRUE;
+  //blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+  //blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+  //blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+  //blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+  //blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+  //blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+  //blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+  //hr = g_device.CreateBlendState(&blendDesc, &g_pShadowBlendState);
+  //if (FAILED(hr))
+  //  return hr;
 
   D3D11_DEPTH_STENCIL_DESC dsDesc;
   ZeroMemory(&dsDesc, sizeof(dsDesc));
@@ -464,7 +471,7 @@ void CleanupDevice()
 {
   if (g_deviceContext.m_deviceContext) g_deviceContext.m_deviceContext->ClearState();
 
-  if (g_pShadowBlendState) g_pShadowBlendState->Release();
+	g_shadowBlendState.destroy();
   if (g_pShadowDepthStencilState) g_pShadowDepthStencilState->Release();
   g_shaderShadow.destroy();
 
@@ -657,7 +664,7 @@ void RenderScene()
   //------------- Renderizar la sombra del cubo -------------//
 	g_shaderShadow.render(g_deviceContext, PIXEL_SHADER);
 
-  g_deviceContext.m_deviceContext->OMSetBlendState(g_pShadowBlendState, blendFactor, 0xffffffff);
+	g_shadowBlendState.render(g_deviceContext, blendFactor, 0xffffffff);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(g_pShadowDepthStencilState, 0);
   
 	// Asignar buffers Vertex e Index
@@ -669,7 +676,7 @@ void RenderScene()
 
   g_deviceContext.m_deviceContext->DrawIndexed(cubeMesh.m_index.size(), 0, 0);
 
-  g_deviceContext.m_deviceContext->OMSetBlendState(NULL, blendFactor, 0xffffffff);
+	g_shadowBlendState.render(g_deviceContext, blendFactor, 0xffffffff, true);
   g_deviceContext.m_deviceContext->OMSetDepthStencilState(NULL, 0);
 
   // Presentar el back buffer al front buffer
