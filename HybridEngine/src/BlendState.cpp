@@ -31,7 +31,7 @@ BlendState::init(Device& device) {
 			("Failed to create blend state. HRESULT: " + std::to_string(hr)).c_str());
 		return hr;
 	}
-
+	return S_OK;
 }
 
 void

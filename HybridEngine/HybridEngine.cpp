@@ -12,6 +12,7 @@
 #include "Buffer.h"
 #include "MeshComponent.h"
 #include "BlendState.h"
+#include "DepthStencilState.h"
 
 // Customs
 Window g_window;
@@ -26,6 +27,7 @@ Viewport g_viewport;
 ShaderProgram g_shaderProgram;
 ShaderProgram g_shaderShadow;
 BlendState g_shadowBlendState;
+DepthStencilState g_shadowDepthStencilState;
 
 // Camera Buffers
 Buffer m_neverChanges;
@@ -55,8 +57,6 @@ XMFLOAT4                            g_vMeshColor(0.7f, 0.7f, 0.7f, 1.0f);
 
 //----- Variables agregadas para el plano y sombras -----//
 UINT                                g_planeIndexCount = 0;
-//ID3D11BlendState*                   g_pShadowBlendState = NULL;
-ID3D11DepthStencilState*            g_pShadowDepthStencilState = NULL;
 XMFLOAT4                            g_LightPos(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
 
 float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
@@ -72,7 +72,6 @@ CBChangesEveryFrame cbShadow;
 //--------------------------------------------------------------------------------------
 // Declaraciones adelantadas
 //--------------------------------------------------------------------------------------
-//HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 HRESULT InitDevice();
 void CleanupDevice();
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -334,8 +333,6 @@ HRESULT InitDevice()
     return hr;
 
   // Inicializar las matrices de mundo, vista y proyección
-  // --- Para el cubo, se añade una traslación hacia arriba (2 unidades) antes de la rotación ---
-  // Nota: Esto hará que el cubo se ubique por encima del plano.
   XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
   XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
   XMVECTOR Up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -347,7 +344,6 @@ HRESULT InitDevice()
   cbChangesOnResize.mProjection = XMMatrixTranspose(g_Projection);
 
   //------- CREACIÓN DE GEOMETRÍA DEL PLANO (suelo) -------//
-  // Se amplían las dimensiones del plano para que sea más visible.
   SimpleVertex planeVertices[] =
   {
       { XMFLOAT3(-20.0f, 0.0f, -20.0f), XMFLOAT2(0.0f, 0.0f) },
@@ -397,24 +393,6 @@ HRESULT InitDevice()
     return hr;
   }
 
-  //bd.Usage = D3D11_USAGE_DEFAULT;
-  //bd.ByteWidth = sizeof(SimpleVertex) * 4;
-  //bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  //bd.CPUAccessFlags = 0;
-  //InitData.pSysMem = planeVertices;
-  //hr = g_device.CreateBuffer(&bd, &InitData, &g_pPlaneVertexBuffer);
-  //if (FAILED(hr))
-  //  return hr;
-  //
-  //bd.Usage = D3D11_USAGE_DEFAULT;
-  //bd.ByteWidth = sizeof(WORD) * g_planeIndexCount;
-  //bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  //bd.CPUAccessFlags = 0;
-  //InitData.pSysMem = planeIndices;
-  //hr = g_device.CreateBuffer(&bd, &InitData, &g_pPlaneIndexBuffer);
-  //if (FAILED(hr))
-  //  return hr;
-
   //------- COMPILAR SHADER DE SOMBRA -------//
 	hr = g_shaderShadow.CreateShader(g_device, PIXEL_SHADER ,"HybridEngine.fx");
 
@@ -437,29 +415,14 @@ HRESULT InitDevice()
       ("Failed to initialize Shadow Blend State. HRESULT: " + std::to_string(hr)).c_str());
 		return hr;
 	}
-  //D3D11_BLEND_DESC blendDesc;
-  //ZeroMemory(&blendDesc, sizeof(blendDesc));
-  //blendDesc.RenderTarget[0].BlendEnable = TRUE;
-  //blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-  //blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-  //blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-  //blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-  //blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-  //blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-  //blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-  //hr = g_device.CreateBlendState(&blendDesc, &g_pShadowBlendState);
-  //if (FAILED(hr))
-  //  return hr;
 
-  D3D11_DEPTH_STENCIL_DESC dsDesc;
-  ZeroMemory(&dsDesc, sizeof(dsDesc));
-  dsDesc.DepthEnable = TRUE;
-  dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // Deshabilitar escritura en depth
-  dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-  dsDesc.StencilEnable = FALSE;
-  hr = g_device.CreateDepthStencilState(&dsDesc, &g_pShadowDepthStencilState);
-  if (FAILED(hr))
+  hr = g_shadowDepthStencilState.init(g_device, true, false);
+
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize Depth Stencil State. HRESULT: " + std::to_string(hr)).c_str());
     return hr;
+  }
 
   return S_OK;
 }
@@ -472,7 +435,7 @@ void CleanupDevice()
   if (g_deviceContext.m_deviceContext) g_deviceContext.m_deviceContext->ClearState();
 
 	g_shadowBlendState.destroy();
-  if (g_pShadowDepthStencilState) g_pShadowDepthStencilState->Release();
+  g_shadowDepthStencilState.destroy();
   g_shaderShadow.destroy();
 
 	m_planeVertexBuffer.destroy();
@@ -665,8 +628,8 @@ void RenderScene()
 	g_shaderShadow.render(g_deviceContext, PIXEL_SHADER);
 
 	g_shadowBlendState.render(g_deviceContext, blendFactor, 0xffffffff);
-  g_deviceContext.m_deviceContext->OMSetDepthStencilState(g_pShadowDepthStencilState, 0);
-  
+  g_shadowDepthStencilState.render(g_deviceContext, 0);
+
 	// Asignar buffers Vertex e Index
   m_vertexBuffer.render(g_deviceContext, 0, 1);
   m_indexBuffer.render(g_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
@@ -677,7 +640,7 @@ void RenderScene()
   g_deviceContext.m_deviceContext->DrawIndexed(cubeMesh.m_index.size(), 0, 0);
 
 	g_shadowBlendState.render(g_deviceContext, blendFactor, 0xffffffff, true);
-  g_deviceContext.m_deviceContext->OMSetDepthStencilState(NULL, 0);
+  g_shadowDepthStencilState.render(g_deviceContext, 0, true);
 
   // Presentar el back buffer al front buffer
   g_swapChain.present();
