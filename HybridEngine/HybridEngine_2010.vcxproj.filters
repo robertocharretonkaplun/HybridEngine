@@ -68,6 +68,9 @@
     <ClInclude Include="include\DepthStencilState.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\ModelLoader.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -111,6 +114,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\DepthStencilState.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ModelLoader.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>
