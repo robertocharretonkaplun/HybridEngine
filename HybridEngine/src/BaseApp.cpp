@@ -87,68 +87,11 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-  // Crear vertex buffer y index buffer para el cubo
-  SimpleVertex vertices[] = {
-      { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+  // Crear vertex buffer y index buffer para el pistol
+  DrakePistol = m_modelLoader.LoadOBJModel("drakefire_pistol_low.obj");
 
-      { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
 
-      { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-      { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-      { XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
-
-      { XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
-  };
-  unsigned int indices[] = {
-      3,1,0,
-      2,1,3,
-
-      6,4,5,
-      7,4,6,
-
-      11,9,8,
-      10,9,11,
-
-      14,12,13,
-      15,12,14,
-
-      19,17,16,
-      18,17,19,
-
-      22,20,21,
-      23,20,22
-  };
-
-  // Store the vertex data
-  for (int i = 0; i < 24; i++) {
-    cubeMesh.m_vertex.push_back(vertices[i]);
-  }
-  // Store the index data
-  for (int i = 0; i < 36; i++) {
-    cubeMesh.m_index.push_back(indices[i]);
-  }
-
-  hr = m_vertexBuffer.init(m_device, cubeMesh, D3D11_BIND_VERTEX_BUFFER);
+  hr = m_vertexBuffer.init(m_device, DrakePistol, D3D11_BIND_VERTEX_BUFFER);
 
   if (FAILED(hr)) {
     ERROR("Main", "InitDevice",
@@ -156,7 +99,7 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-  hr = m_indexBuffer.init(m_device, cubeMesh, D3D11_BIND_INDEX_BUFFER);
+  hr = m_indexBuffer.init(m_device, DrakePistol, D3D11_BIND_INDEX_BUFFER);
 
   if (FAILED(hr)) {
     ERROR("Main", "InitDevice",
@@ -191,7 +134,7 @@ HRESULT BaseApp::init()
 
 
   // Cargar la textura
-  hr = D3DX11CreateShaderResourceViewFromFile(m_device.m_device, "seafloor.dds", NULL, NULL, &m_pTextureRV, NULL);
+  hr = D3DX11CreateShaderResourceViewFromFile(m_device.m_device, "GunAlbedo.dds", NULL, NULL, &m_pTextureRV, NULL);
   if (FAILED(hr))
     return hr;
 
@@ -354,10 +297,7 @@ BaseApp::update() {
   // Combinar: primero escala, luego rota y por último traslada
   m_World = cubeTransMat * cubeRotMat * cubeScaleMat;
 
-  // Actualizar el color animado del cubo
-  m_vMeshColor.x = (sinf(t * 1.0f) + 1.0f) * 0.5f;
-  m_vMeshColor.y = (cosf(t * 3.0f) + 1.0f) * 0.5f;
-  m_vMeshColor.z = (sinf(t * 5.0f) + 1.0f) * 0.5f;
+  // Actualizar el color animado del cub
 
   // --- Transformación del plano ---
   // Parámetros para el plano:
@@ -382,6 +322,7 @@ BaseApp::update() {
   m_constPlane.update(m_deviceContext, nullptr, 0, nullptr, &cbPlane, 0, 0);
 
   // Update cube
+  m_vMeshColor = XMFLOAT4(1,1,1,1);
   cb.mWorld = XMMatrixTranspose(m_World);
   cb.vMeshColor = m_vMeshColor;
   m_changeEveryFrame.update(m_deviceContext, nullptr, 0, nullptr, &cb, 0, 0);
@@ -444,7 +385,7 @@ BaseApp::render() {
 
   m_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &m_pTextureRV);
   m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
-  m_deviceContext.m_deviceContext->DrawIndexed(cubeMesh.m_index.size(), 0, 0);
+  m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
 
   //------------- Renderizar la sombra del cubo -------------//
   m_shaderShadow.render(m_deviceContext, PIXEL_SHADER);
@@ -459,7 +400,7 @@ BaseApp::render() {
   // Asignar buffers constantes
   m_constShadow.render(m_deviceContext, 2, 1, true);
 
-  m_deviceContext.m_deviceContext->DrawIndexed(cubeMesh.m_index.size(), 0, 0);
+  m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
 
   m_shadowBlendState.render(m_deviceContext, blendFactor, 0xffffffff, true);
   m_shadowDepthStencilState.render(m_deviceContext, 0, true);

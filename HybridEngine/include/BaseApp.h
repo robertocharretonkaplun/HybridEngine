@@ -15,7 +15,7 @@
 #include "BlendState.h"
 #include "DepthStencilState.h"
 #include "UserInterface.h"
-
+#include "ModelLoader.h"
 class
 BaseApp {
 public:
@@ -55,7 +55,7 @@ private:
 	ShaderProgram m_shaderShadow;
 	BlendState m_shadowBlendState;
 	DepthStencilState m_shadowDepthStencilState;
-
+	ModelLoader m_modelLoader;
 	// Camera Buffers
 	Buffer m_neverChanges;
 	Buffer m_changeOnResize;
@@ -88,7 +88,8 @@ private:
 
 	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-	MeshComponent cubeMesh;
+	//MeshComponent cubeMesh;
+	MeshComponent DrakePistol;
 	MeshComponent planeMesh;
 	CBNeverChanges cbNeverChanges;
 	CBChangeOnResize cbChangesOnResize;
