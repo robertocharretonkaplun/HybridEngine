@@ -247,9 +247,10 @@ HRESULT BaseApp::init()
 
 	m_LightPos = XMFLOAT4(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
 	// Initialize User Interface
-	m_userInterface.init(m_window.m_hWnd,
-		m_device.m_device,
-		m_deviceContext.m_deviceContext);
+	
+  m_userInterface.init(m_window.m_hWnd,
+		                   m_device.m_device,
+		                   m_deviceContext.m_deviceContext);
   return S_OK;
 }
 
@@ -345,8 +346,6 @@ BaseApp::update() {
 
 void 
 BaseApp::render() {
-
-
   // Limpiar el back buffer y el depth buffer
   m_renderTargetView.render(m_deviceContext, m_depthStencilView, 1, ClearColor);
 
@@ -407,6 +406,7 @@ BaseApp::render() {
 
 	// Renderizar la interfaz de usuario y mostrar la imagen
 	m_userInterface.render();
+
   // Presentar el back buffer al front buffer
   m_swapChain.present();
 }

@@ -1,37 +1,41 @@
 #include "ModelLoader.h"
 #include "OBJ_Loader.h"
 
-MeshComponent 
+MeshComponent
 ModelLoader::LoadOBJModel(const std::string& filePath) {
 	MeshComponent mesh;
 	objl::Loader loader;
 
-	if (loader.LoadFile(filePath)) {
-		mesh.m_name = filePath;
-
-		// Reserve capacity for the vectors
-		mesh.m_vertex.reserve(loader.LoadedVertices.size());
-		mesh.m_index.reserve(loader.LoadedIndices.size());
-
-		// Load the vertices
-		for (auto& vertex : loader.LoadedVertices) {
-			mesh.m_vertex.emplace_back(SimpleVertex{
-				{ vertex.Position.X, vertex.Position.Y, vertex.Position.Z },
-				{ vertex.TextureCoordinate.X, 1.0f - vertex.TextureCoordinate.Y }
-				});
-		}
-
-		// Load the indices
-		for (auto index : loader.LoadedIndices) {
-			mesh.m_index.push_back(index);
-		}
-
-		mesh.m_numVertex = mesh.m_vertex.size();
-		mesh.m_numIndex = mesh.m_index.size();
+	if (!loader.LoadFile(filePath)) {
+		return mesh;
 	}
+
+	mesh.m_name = filePath;
+
+	const unsigned int numVertices = loader.LoadedVertices.size();
+	const unsigned int numIndices = loader.LoadedIndices.size();
+
+	// Reservar memoria exacta para evitar reallocs
+	mesh.m_vertex.resize(numVertices);
+	mesh.m_index = std::move(loader.LoadedIndices);  // Mover directamente
+
+	// Usar acceso por índice para evitar cópias extra
+	for (unsigned int i = 0; i < numVertices; ++i) {
+		const auto& v = loader.LoadedVertices[i];
+
+		mesh.m_vertex[i] = SimpleVertex{
+			{ v.Position.X, v.Position.Y, v.Position.Z },
+			{ v.TextureCoordinate.X, 1.0f - v.TextureCoordinate.Y }
+		};
+	}
+
+	mesh.m_numVertex = numVertices;
+	mesh.m_numIndex = numIndices;
 
 	return mesh;
 }
+
+
 bool
 ModelLoader::InitializeFBXManager() {
 	// Initialize the FBX SDK manager
@@ -135,8 +139,84 @@ ModelLoader::ProcessFBXNode(FbxNode* node) {
 	}
 }
 
-void ModelLoader::ProcessFBXMesh(FbxNode* node)
-{
+void 
+ModelLoader::ProcessFBXMesh(FbxNode* node) {
+	// 01. Get the mesh from the node. If there is no mesh, exit early.
+	FbxMesh* mesh = node->GetMesh();
+	if (!mesh) return;
+
+	std::vector<SimpleVertex> vertices;
+	std::vector<unsigned int> indices;
+
+	// 02. Process vertices: extract positions from control points.
+	for (int i = 0; i < mesh->GetControlPointsCount(); i++) {
+		SimpleVertex vertex;
+		FbxVector4* controlPoint = mesh->GetControlPoints();
+		vertex.Pos = XMFLOAT3((float)controlPoint[i][0],
+													(float)controlPoint[i][1],
+													(float)controlPoint[i][2]);
+		vertices.push_back(vertex);
+	}
+
+	// 03. Process UV coordinates if available.
+	if (mesh->GetElementUVCount() > 0) {
+		FbxGeometryElementUV* uvElement = mesh->GetElementUV(0);
+		FbxGeometryElement::EMappingMode mappingMode = uvElement->GetMappingMode();
+		FbxGeometryElement::EReferenceMode referenceMode = uvElement->GetReferenceMode();
+		int polyIndexCounter = 0; // Counter for polygon vertex indexing when mapping by polygon vertex.
+
+		// 03.1 Iterate through each polygon in the mesh.
+		for (int polyIndex = 0; polyIndex < mesh->GetPolygonCount(); polyIndex++) {
+			int polySize = mesh->GetPolygonSize(polyIndex);
+
+			// 03.1.1 Process each vertex in the polygon.
+			for (int vertIndex = 0; vertIndex < polySize; vertIndex++) {
+				int controlPointIndex = mesh->GetPolygonVertex(polyIndex, vertIndex);
+				int uvIndex = -1;
+
+				// 03.1.1.1 Handle UV mapping mode: by control point.
+				if (mappingMode == FbxGeometryElement::eByControlPoint) {
+					if (referenceMode == FbxGeometryElement::eDirect) {
+						uvIndex = controlPointIndex;
+					}
+					else if (referenceMode == FbxGeometryElement::eIndexToDirect) {
+						uvIndex = uvElement->GetIndexArray().GetAt(controlPointIndex);
+					}
+				}
+				// 03.1.1.2 Handle UV mapping mode: by polygon vertex.
+				else if (mappingMode == FbxGeometryElement::eByPolygonVertex) {
+					if (referenceMode == FbxGeometryElement::eDirect || referenceMode == FbxGeometryElement::eIndexToDirect) {
+						uvIndex = uvElement->GetIndexArray().GetAt(polyIndexCounter);
+						polyIndexCounter++;
+					}
+				}
+
+				// 03.1.1.3 If a valid UV index is found, set the texture coordinate.
+				if (uvIndex != -1) {
+					FbxVector2 uv = uvElement->GetDirectArray().GetAt(uvIndex);
+					vertices[controlPointIndex].Tex = XMFLOAT2((float)uv[0], -(float)uv[1]);
+				}
+			}
+		}
+	}
+
+	// 04. Process indices: extract polygon vertex indices.
+	for (int i = 0; i < mesh->GetPolygonCount(); i++) {
+		for (int j = 0; j < mesh->GetPolygonSize(i); j++) {
+			indices.push_back(mesh->GetPolygonVertex(i, j));
+		}
+	}
+
+	// 05. Create a MeshComponent and populate it with the processed data.
+	MeshComponent meshData;
+	meshData.m_name = node->GetName();
+	meshData.m_vertex = vertices;
+	meshData.m_index = indices;
+	meshData.m_numVertex = vertices.size();
+	meshData.m_numIndex = indices.size();
+
+	// 06. Add the processed mesh data to the collection.
+	meshes.push_back(meshData);
 }
 
 void ModelLoader::ProcessFBXMaterials(FbxSurfaceMaterial* material)
