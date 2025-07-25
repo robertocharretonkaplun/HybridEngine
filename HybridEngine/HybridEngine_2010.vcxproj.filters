@@ -18,6 +18,15 @@
     <Filter Include="source">
       <UniqueIdentifier>{9ed35299-ad08-4415-b63e-d634559ae380}</UniqueIdentifier>
     </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{2665abf9-14c8-4a7e-91b0-ae5d16c31de6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui\include">
+      <UniqueIdentifier>{a6923098-17b1-4fae-a3d6-b8e2ef93d109}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui\source">
+      <UniqueIdentifier>{5ea84d84-7593-4acd-aa8f-7a247f369767}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Prerequisites.h">
@@ -71,6 +80,39 @@
     <ClInclude Include="include\ModelLoader.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Screenshot.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\UserInterface.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imconfig.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imgui.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imgui_internal.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_rectpack.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_textedit.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_truetype.h">
+      <Filter>imgui\include</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_dx11.h">
+      <Filter>imgui\source</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_win32.h">
+      <Filter>imgui\source</Filter>
+    </ClInclude>
+    <ClInclude Include="include\OBJ_Loader.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -117,6 +159,33 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\ModelLoader.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_demo.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_draw.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_tables.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_widgets.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_dx11.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_win32.cpp">
+      <Filter>imgui\source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Screenshot.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UserInterface.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

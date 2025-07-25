@@ -161,7 +161,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -205,7 +205,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;_DEBUG;DEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -250,7 +250,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -295,7 +295,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -341,7 +341,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -386,7 +386,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FloatingPointModel>Fast</FloatingPointModel>
       <ExceptionHandling>Sync</ExceptionHandling>
-      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./include/;DXUT\Core;DXUT\Optional;./include/fbx/;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking\backends;C:\Users\rchar\OneDrive\Documentos\GitHub\HybridEngine\HybridEngine\Imgui\imgui-docking-znly-docking;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>WIN32;FBXSDK_SHARED;NDEBUG;PROFILE;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -424,6 +424,13 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_demo.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_draw.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_tables.cpp" />
+    <ClCompile Include="Imgui\imgui-docking-znly-docking\imgui_widgets.cpp" />
     <ClCompile Include="src\BaseApp.cpp" />
     <ClCompile Include="src\BlendState.cpp" />
     <ClCompile Include="src\Buffer.cpp" />
@@ -434,9 +441,11 @@
     <ClCompile Include="src\InputLayout.cpp" />
     <ClCompile Include="src\ModelLoader.cpp" />
     <ClCompile Include="src\RenderTargetView.cpp" />
+    <ClCompile Include="src\Screenshot.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\SwapChain.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\UserInterface.cpp" />
     <ClCompile Include="src\Viewport.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
@@ -444,6 +453,14 @@
     <None Include="HybridEngine.fx" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\backends\imgui_impl_win32.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imconfig.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imgui.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imgui_internal.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_rectpack.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_textedit.h" />
+    <ClInclude Include="Imgui\imgui-docking-znly-docking\imstb_truetype.h" />
     <ClInclude Include="include\BaseApp.h" />
     <ClInclude Include="include\BlendState.h" />
     <ClInclude Include="include\Buffer.h" />
@@ -454,11 +471,14 @@
     <ClInclude Include="include\InputLayout.h" />
     <ClInclude Include="include\MeshComponent.h" />
     <ClInclude Include="include\ModelLoader.h" />
+    <ClInclude Include="include\OBJ_Loader.h" />
     <ClInclude Include="include\Prerequisites.h" />
     <ClInclude Include="include\RenderTargetView.h" />
+    <ClInclude Include="include\Screenshot.h" />
     <ClInclude Include="include\ShaderProgram.h" />
     <ClInclude Include="include\SwapChain.h" />
     <ClInclude Include="include\Texture.h" />
+    <ClInclude Include="include\UserInterface.h" />
     <ClInclude Include="include\Viewport.h" />
     <ClInclude Include="include\Window.h" />
     <CLInclude Include="resource.h" />

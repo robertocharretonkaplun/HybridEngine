@@ -1,5 +1,37 @@
 #include "ModelLoader.h"
+#include "OBJ_Loader.h"
 
+MeshComponent 
+ModelLoader::LoadOBJModel(const std::string& filePath) {
+	MeshComponent mesh;
+	objl::Loader loader;
+
+	if (loader.LoadFile(filePath)) {
+		mesh.m_name = filePath;
+
+		// Reserve capacity for the vectors
+		mesh.m_vertex.reserve(loader.LoadedVertices.size());
+		mesh.m_index.reserve(loader.LoadedIndices.size());
+
+		// Load the vertices
+		for (auto& vertex : loader.LoadedVertices) {
+			mesh.m_vertex.emplace_back(SimpleVertex{
+				{ vertex.Position.X, vertex.Position.Y, vertex.Position.Z },
+				{ vertex.TextureCoordinate.X, 1.0f - vertex.TextureCoordinate.Y }
+				});
+		}
+
+		// Load the indices
+		for (auto index : loader.LoadedIndices) {
+			mesh.m_index.push_back(index);
+		}
+
+		mesh.m_numVertex = mesh.m_vertex.size();
+		mesh.m_numIndex = mesh.m_index.size();
+	}
+
+	return mesh;
+}
 bool
 ModelLoader::InitializeFBXManager() {
 	// Initialize the FBX SDK manager
@@ -88,7 +120,7 @@ ModelLoader::LoadFBXModel(const std::string& filePath) {
 	return false;
 }
 
-void 
+void
 ModelLoader::ProcessFBXNode(FbxNode* node) {
 	// 01. Process all the node's meshes
 	if (node->GetNodeAttribute()) {
@@ -101,4 +133,12 @@ ModelLoader::ProcessFBXNode(FbxNode* node) {
 	for (int i = 0; i < node->GetChildCount(); i++) {
 		ProcessFBXNode(node->GetChild(i));
 	}
+}
+
+void ModelLoader::ProcessFBXMesh(FbxNode* node)
+{
+}
+
+void ModelLoader::ProcessFBXMaterials(FbxSurfaceMaterial* material)
+{
 }

@@ -10,6 +10,8 @@ public:
 	~ModelLoader() = default;
 
 	/* OBJ MODEL LOADER*/
+	MeshComponent
+	LoadOBJModel(const std::string & filePath);
 
 	/* FBX MODEL LOADER*/
 	bool
