@@ -45,6 +45,9 @@
     <Filter Include="include\EngineUtilities\Vectors">
       <UniqueIdentifier>{06a4945b-931d-424c-8fd9-e363d9852f65}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\ECS">
+      <UniqueIdentifier>{78021625-e054-4592-8c53-abc3c7ea1353}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Prerequisites.h">
