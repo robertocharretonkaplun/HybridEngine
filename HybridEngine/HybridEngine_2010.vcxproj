@@ -476,6 +476,7 @@
     <ClInclude Include="include\RenderTargetView.h" />
     <ClInclude Include="include\Screenshot.h" />
     <ClInclude Include="include\ShaderProgram.h" />
+    <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\SwapChain.h" />
     <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\UserInterface.h" />

@@ -74,7 +74,8 @@ private:
 	Buffer m_constPlane;
 
 	// Variable global para el constant buffer de la luz puntual
-	ID3D11ShaderResourceView* m_pTextureRV = NULL;
+	Texture m_drakePistolTexture;
+	Texture m_defaultTexture;
 	ID3D11SamplerState* m_pSamplerLinear = NULL;
 	XMMATRIX                            m_World;         // Para el cubo
 	XMMATRIX                            m_PlaneWorld;    // Para el plano

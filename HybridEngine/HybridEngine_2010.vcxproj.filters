@@ -113,6 +113,9 @@
     <ClInclude Include="include\OBJ_Loader.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\stb_image.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />

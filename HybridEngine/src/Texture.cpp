@@ -1,24 +1,112 @@
-//#define STB_IMAGE_IMPLEMENTATION
-//#include "stb_image.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "Texture.h"
 #include "Device.h"
 #include "DeviceContext.h"
 
-HRESULT Texture::init(Device device, const std::string& textureName, ExtensionType extensionType)
-{
-	return E_NOTIMPL;
+HRESULT
+Texture::init(Device device, const std::string& textureName, ExtensionType extensionType) {
+	if (!device.m_device) {
+		ERROR("Texture", "init", "Device is null.");
+		return E_POINTER;
+	}
+	if (textureName.empty()) {
+		ERROR("Texture", "init", "Texture name cannot be empty.");
+		return E_INVALIDARG;
+	}
+
+	HRESULT hr = S_OK;
+
+	switch (extensionType) {
+	case DDS: {
+		m_textureName = textureName + ".dds";
+
+		// Cargar textura DDS
+		hr = D3DX11CreateShaderResourceViewFromFile(
+			device.m_device,
+			m_textureName.c_str(),
+			nullptr,
+			nullptr,
+			&m_textureFromImg,
+			nullptr
+		);
+
+		if (FAILED(hr)) {
+			ERROR("Texture", "init",
+				("Failed to load DDS texture. Verify filepath: " + m_textureName).c_str());
+			return hr;
+		}
+		break;
+	}
+
+	case PNG: {
+		m_textureName = textureName + ".png";
+		int width, height, channels;
+		unsigned char* data = stbi_load(m_textureName.c_str(), &width, &height, &channels, 4); // 4 bytes por pixel (RGBA)
+		if (!data) {
+			ERROR("Texture", "init",
+				("Failed to load PNG texture: " + std::string(stbi_failure_reason())).c_str());
+			return E_FAIL;
+		}
+
+		// Crear descripción de textura
+		D3D11_TEXTURE2D_DESC textureDesc = {};
+		textureDesc.Width = width;
+		textureDesc.Height = height;
+		textureDesc.MipLevels = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.Usage = D3D11_USAGE_DEFAULT;
+		textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+		// Crear datos de subrecarga
+		D3D11_SUBRESOURCE_DATA initData = {};
+		initData.pSysMem = data;
+		initData.SysMemPitch = width * 4;
+
+		hr = device.CreateTexture2D(&textureDesc, &initData, &m_texture);
+		stbi_image_free(data); // Liberar los datos de imagen inmediatamente
+
+		if (FAILED(hr)) {
+			ERROR("Texture", "init", "Failed to create texture from PNG data");
+			return hr;
+		}
+
+		// Crear vista del recurso de la textura
+		D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Format = textureDesc.Format;
+		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MipLevels = 1;
+
+		hr = device.m_device->CreateShaderResourceView(m_texture, &srvDesc, &m_textureFromImg);
+		SAFE_RELEASE(m_texture); // Liberar textura intermedia
+
+		if (FAILED(hr)) {
+			ERROR("Texture", "init", "Failed to create shader resource view for PNG texture");
+			return hr;
+		}
+		break;
+	}
+
+	default:
+		ERROR("Texture", "init", "Unsupported extension type");
+		return E_INVALIDARG;
+	}
+
+	return hr;
 }
 
 HRESULT
-Texture::init(Device device, 
-							unsigned int width, 
-							unsigned int height, 
-							DXGI_FORMAT Format, 
-							unsigned int BindFlags, 
-							unsigned int sampleCount, 
-							unsigned int qualityLevels ) {
+Texture::init(Device device,
+	unsigned int width,
+	unsigned int height,
+	DXGI_FORMAT Format,
+	unsigned int BindFlags,
+	unsigned int sampleCount,
+	unsigned int qualityLevels) {
 	if (!device.m_device) {
-		ERROR("DepthStencilView", "init", "Device is null.");
+		ERROR("Texture", "init", "Device is null.");
 		return E_POINTER;
 	}
 	if (width == 0 || height == 0) {
@@ -70,9 +158,9 @@ Texture::init(Device& device, Texture& textureRef, DXGI_FORMAT format) {
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
-	HRESULT hr = device.m_device->CreateShaderResourceView(textureRef.m_texture, 
-																												 &srvDesc, 
-																												 &m_textureFromImg);
+	HRESULT hr = device.m_device->CreateShaderResourceView(textureRef.m_texture,
+		&srvDesc,
+		&m_textureFromImg);
 
 	if (FAILED(hr)) {
 		ERROR("Texture", "init",
@@ -87,10 +175,10 @@ void Texture::update() {
 
 }
 
-void 
-Texture::render(DeviceContext& deviceContext, 
-								unsigned int StartSlot, 
-								unsigned int NumViews) {
+void
+Texture::render(DeviceContext& deviceContext,
+	unsigned int StartSlot,
+	unsigned int NumViews) {
 	if (!deviceContext.m_deviceContext) {
 		ERROR("DepthStencilView", "render", "Device context is null.");
 		return;

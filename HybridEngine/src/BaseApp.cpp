@@ -88,7 +88,7 @@ HRESULT BaseApp::init()
   }
 
   // Crear vertex buffer y index buffer para el pistol
-  DrakePistol = m_modelLoader.LoadOBJModel("drakefire_pistol_low.obj");
+  DrakePistol = m_modelLoader.LoadOBJModel("Models/drakefire_pistol_low.obj");
 
 
   hr = m_vertexBuffer.init(m_device, DrakePistol, D3D11_BIND_VERTEX_BUFFER);
@@ -132,12 +132,22 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-
   // Cargar la textura
-  hr = D3DX11CreateShaderResourceViewFromFile(m_device.m_device, "GunAlbedo.dds", NULL, NULL, &m_pTextureRV, NULL);
-  if (FAILED(hr))
+  hr = m_drakePistolTexture.init(m_device, "Textures/GunAlbedo",DDS);
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize DrakePistol Texture. HRESULT: " + std::to_string(hr)).c_str());
     return hr;
+	}
 
+  // Plane Default Texture
+	hr = m_defaultTexture.init(m_device, "Textures/Default", PNG);
+  if (FAILED(hr)) {
+    ERROR("Main", "InitDevice",
+      ("Failed to initialize Default Texture. HRESULT: " + std::to_string(hr)).c_str());
+		return hr;
+	}
+  
   // Crear el sampler state
   D3D11_SAMPLER_DESC sampDesc;
   ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -357,10 +367,10 @@ BaseApp::render() {
   // Configurar los buffers y shaders para el pipeline
   m_shaderProgram.render(m_deviceContext);
 
+  //------------- Renderizar Plano-------------//
   // Asignar buffers constantes
   m_neverChanges.render(m_deviceContext, 0, 1);
   m_changeOnResize.render(m_deviceContext, 1, 1);
-  //------------- Renderizar el plano (suelo) -------------//
   // Asignar buffers Vertex e Index
   m_planeVertexBuffer.render(m_deviceContext, 0, 1);
   m_planeIndexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
@@ -369,11 +379,11 @@ BaseApp::render() {
   m_constPlane.render(m_deviceContext, 2, 1);
   m_constPlane.render(m_deviceContext, 2, 1, true);
 
-  m_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &m_pTextureRV);
+  m_defaultTexture.render(m_deviceContext, 0, 1);
   m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
   m_deviceContext.m_deviceContext->DrawIndexed(planeMesh.m_index.size(), 0, 0);
 
-  //------------- Renderizar el cubo (normal) -------------//
+  //------------- Renderizar la Pistola-------------//
   // Asignar buffers Vertex e Index
   m_vertexBuffer.render(m_deviceContext, 0, 1);
   m_indexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
@@ -382,7 +392,7 @@ BaseApp::render() {
   m_changeEveryFrame.render(m_deviceContext, 2, 1);
   m_changeEveryFrame.render(m_deviceContext, 2, 1, true);
 
-  m_deviceContext.m_deviceContext->PSSetShaderResources(0, 1, &m_pTextureRV);
+  m_drakePistolTexture.render(m_deviceContext, 0, 1);
   m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
   m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
 
@@ -424,7 +434,8 @@ BaseApp::destroy() {
   m_planeIndexBuffer.destroy();
 
   if (m_pSamplerLinear) m_pSamplerLinear->Release();
-  if (m_pTextureRV) m_pTextureRV->Release();
+	m_drakePistolTexture.destroy();
+  m_defaultTexture.destroy();
 
   m_neverChanges.destroy();
   m_changeOnResize.destroy();

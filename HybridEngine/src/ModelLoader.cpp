@@ -219,6 +219,18 @@ ModelLoader::ProcessFBXMesh(FbxNode* node) {
 	meshes.push_back(meshData);
 }
 
-void ModelLoader::ProcessFBXMaterials(FbxSurfaceMaterial* material)
-{
+void 
+ModelLoader::ProcessFBXMaterials(FbxSurfaceMaterial* material) {
+	if (material) {
+		FbxProperty prop = material->FindProperty(FbxSurfaceMaterial::sDiffuse);
+		if (prop.IsValid()) {
+			int textureCount = prop.GetSrcObjectCount<FbxTexture>();
+			for (int i = 0; i < textureCount; ++i) {
+				FbxTexture* texture = FbxCast<FbxTexture>(prop.GetSrcObject<FbxTexture>(i));
+				if (texture) {
+					textureFileNames.push_back(texture->GetName());
+				}
+			}
+		}
+	}
 }
