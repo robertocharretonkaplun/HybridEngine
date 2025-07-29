@@ -14,6 +14,12 @@
 #include "Resource.h"
 #include "resource.h"
 
+// Third Party Libraries
+#include "EngineUtilities\Memory\TSharedPointer.h"
+#include "EngineUtilities\Memory\TWeakPointer.h"
+#include "EngineUtilities\Memory\TStaticPtr.h"
+#include "EngineUtilities\Memory\TUniquePtr.h"
+
 // MACROS
 #define SAFE_RELEASE(x) if(x != nullptr) x->Release(); x = nullptr;
 
@@ -70,4 +76,12 @@ enum
 ShaderType {
   VERTEX_SHADER = 0,
   PIXEL_SHADER = 1
+};
+
+enum 
+ComponentType {
+  NONE = 0,     ///< Tipo de componente no especificado.
+  TRANSFORM = 1,///< Componente de transformación.
+  MESH = 2,     ///< Componente de malla.
+  MATERIAL = 3  ///< Componente de material.
 };

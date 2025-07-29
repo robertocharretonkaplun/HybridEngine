@@ -468,6 +468,8 @@
     <ClInclude Include="include\DepthStencilView.h" />
     <ClInclude Include="include\Device.h" />
     <ClInclude Include="include\DeviceContext.h" />
+    <ClInclude Include="include\ECS\Component.h" />
+    <ClInclude Include="include\ECS\Entity.h" />
     <ClInclude Include="include\EngineUtilities\Matrix\Matrix2x2.h" />
     <ClInclude Include="include\EngineUtilities\Matrix\Matrix3x3.h" />
     <ClInclude Include="include\EngineUtilities\Matrix\Matrix4x4.h" />

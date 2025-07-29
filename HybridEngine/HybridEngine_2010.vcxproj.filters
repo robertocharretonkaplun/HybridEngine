@@ -185,6 +185,12 @@
     <ClInclude Include="include\EngineUtilities\Vectors\Vector4.h">
       <Filter>include\EngineUtilities\Vectors</Filter>
     </ClInclude>
+    <ClInclude Include="include\ECS\Component.h">
+      <Filter>include\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ECS\Entity.h">
+      <Filter>include\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
