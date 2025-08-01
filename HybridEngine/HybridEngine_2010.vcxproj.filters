@@ -191,6 +191,9 @@
     <ClInclude Include="include\ECS\Entity.h">
       <Filter>include\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="include\ECS\Actor.h">
+      <Filter>include\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -264,6 +267,9 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\UserInterface.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ECS\Actor.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

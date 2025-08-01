@@ -28,7 +28,7 @@ public:
    * @param deltaTime El tiempo transcurrido desde la última actualización.
    */
   virtual void 
-  update(float deltaTime) = 0;
+  update(float deltaTime, DeviceContext& deviceContext) = 0;
 
   /**
    * @brief Método virtual puro para renderizar el componente.
