@@ -37,7 +37,7 @@ class Window;
 class SwapChain;
 class Texture;
 class Actor;
-//class Model;
+class ModelComponent;
 
 class 
 UserInterface {
@@ -70,13 +70,13 @@ public:
   Renderer(Window window, ID3D11ShaderResourceView* renderTexture);
 
   //void
-  //Inspector(std::vector<Model> & models, int index);
+  //Inspector(std::vector<MeshComponent> & models, int index);
 
-  //void
-  //inspectorGeneral(EngineUtilities::TSharedPointer<Actor> actor);
+  void
+  inspectorGeneral(EngineUtilities::TSharedPointer<Actor> actor);
 
-  //void 
-  //inspectorContainer(EngineUtilities::TSharedPointer<Actor> actor);
+  void 
+  inspectorContainer(EngineUtilities::TSharedPointer<Actor> actor);
 
   void
   output();

@@ -16,6 +16,8 @@
 #include "DepthStencilState.h"
 #include "UserInterface.h"
 #include "ModelLoader.h"
+#include "ECS\Actor.h"
+
 class
 BaseApp {
 public:
@@ -63,19 +65,19 @@ private:
 	// Cube Buffers
 	Buffer m_vertexBuffer;
 	Buffer m_indexBuffer;
-	Buffer m_changeEveryFrame;
+	//Buffer m_changeEveryFrame;
 
 	// Cube Shadow Buffers
 	Buffer m_constShadow;
 
 	// Plane Buffers
-	Buffer m_planeVertexBuffer;
-	Buffer m_planeIndexBuffer;
-	Buffer m_constPlane;
+	//Buffer m_planeVertexBuffer;
+	//Buffer m_planeIndexBuffer;
+	//Buffer m_constPlane;
 
 	// Variable global para el constant buffer de la luz puntual
 	Texture m_drakePistolTexture;
-	Texture m_defaultTexture;
+	Texture m_PlaneTexture;
 	ID3D11SamplerState* m_pSamplerLinear = NULL;
 	XMMATRIX                            m_World;         // Para el cubo
 	XMMATRIX                            m_PlaneWorld;    // Para el plano
@@ -94,11 +96,13 @@ private:
 	MeshComponent planeMesh;
 	CBNeverChanges cbNeverChanges;
 	CBChangeOnResize cbChangesOnResize;
-	CBChangesEveryFrame cbPlane;
-	CBChangesEveryFrame cb;
+	//CBChangesEveryFrame cbPlane;
+	//CBChangesEveryFrame cb;
 	CBChangesEveryFrame cbShadow;
 	UserInterface												m_userInterface;
 
-
+	EngineUtilities::TSharedPointer<Actor> m_ADrakePistol;
+	EngineUtilities::TSharedPointer<Actor> m_APlane;
+	std::vector< EngineUtilities::TSharedPointer<Actor>> m_actors;
 
 };

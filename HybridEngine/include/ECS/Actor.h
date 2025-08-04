@@ -3,6 +3,7 @@
 #include "Entity.h"
 #include "Buffer.h"
 #include "Texture.h"
+#include "Transform.h"
 
 class device;
 class MeshComponent;
@@ -26,6 +27,9 @@ public:
    */
   virtual
   ~Actor() = default;
+
+  void 
+  init() override {}
 
   /**
    * @brief Actualiza el actor.
@@ -64,6 +68,15 @@ public:
   void
   setName(const std::string & name) { 
     m_name = name; 
+  }
+
+  /**
+   * @brief Establece las texturas del actor.
+   * @param textures Vector de texturas que se van a establecer.
+   */
+  void
+  setTextures(std::vector<Texture> textures) {
+    m_textures = textures;
   }
 
 private:

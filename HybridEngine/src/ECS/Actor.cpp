@@ -4,7 +4,9 @@
 #include "DeviceContext.h"
 
 Actor::Actor(Device& device) {
-	// Setup Defualt Components
+	// Setup Default Components
+	EngineUtilities::TSharedPointer<Transform> transform = EngineUtilities::MakeShared<Transform>();
+	addComponent(transform);
 	EngineUtilities::TSharedPointer<MeshComponent> meshComponent = EngineUtilities::MakeShared<MeshComponent>();
 	addComponent(meshComponent);
 
@@ -26,7 +28,7 @@ Actor::update(float deltaTime, DeviceContext& deviceContext) {
 	}
 
 	// Update the model buffer
-	//m_model.mWorld = XMMatrixTranspose(getComponent<Transform>()->m_matrix);
+	m_model.mWorld = XMMatrixTranspose(getComponent<Transform>()->matrix);
 	m_model.vMeshColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Update the constant buffer

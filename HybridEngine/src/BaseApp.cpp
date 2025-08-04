@@ -87,28 +87,91 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-  // Crear vertex buffer y index buffer para el pistol
-  DrakePistol = m_modelLoader.LoadOBJModel("Models/drakefire_pistol_low.obj");
+  // Set Drake Pistol Actor
+  m_ADrakePistol = EngineUtilities::MakeShared<Actor>(m_device);
 
+  if (!m_ADrakePistol.isNull()) {
+    // Crear vertex buffer y index buffer para el pistol
+    DrakePistol = m_modelLoader.LoadOBJModel("Models/drakefire_pistol_low.obj");
 
-  hr = m_vertexBuffer.init(m_device, DrakePistol, D3D11_BIND_VERTEX_BUFFER);
+    // Cargar la textura
+    hr = m_drakePistolTexture.init(m_device, "Textures/GunAlbedo", DDS);
+    if (FAILED(hr)) {
+      ERROR("Main", "InitDevice",
+        ("Failed to initialize DrakePistol Texture. HRESULT: " + std::to_string(hr)).c_str());
+      return hr;
+    }
+    std::vector<MeshComponent> DrakePistolMeshes;
+		DrakePistolMeshes.push_back(DrakePistol);
+    std::vector<Texture> DrakePistolTextures;
+		DrakePistolTextures.push_back(m_drakePistolTexture);
+    m_ADrakePistol->setMesh(m_device, DrakePistolMeshes);
+    m_ADrakePistol->setTextures(DrakePistolTextures);
 
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize VertexBuffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
+		m_actors.push_back(m_ADrakePistol);
+    m_ADrakePistol->getComponent<Transform>()->setPosition(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
+    m_ADrakePistol->getComponent<Transform>()->setRotation(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
+    m_ADrakePistol->getComponent<Transform>()->setScale(EngineUtilities::Vector3(1.0f, 1.0f, 1.0f));
+  } else {
+    ERROR("Main", "InitDevice", "Failed to create Drake Pistol Actor.");
+		return E_FAIL;
   }
 
-  hr = m_indexBuffer.init(m_device, DrakePistol, D3D11_BIND_INDEX_BUFFER);
+  // Set Plane Actor
+  m_APlane = EngineUtilities::MakeShared<Actor>(m_device);
+  
+  if (!m_APlane.isNull()) {
+    SimpleVertex planeVertices[] =
+    {
+        { XMFLOAT3(-20.0f, 0.0f, -20.0f), XMFLOAT2(0.0f, 0.0f) },
+        { XMFLOAT3(20.0f, 0.0f, -20.0f), XMFLOAT2(1.0f, 0.0f) },
+        { XMFLOAT3(20.0f, 0.0f,  20.0f), XMFLOAT2(1.0f, 1.0f) },
+        { XMFLOAT3(-20.0f, 0.0f,  20.0f), XMFLOAT2(0.0f, 1.0f) },
+    };
 
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize IndexBuffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
+    WORD planeIndices[] =
+    {
+        0, 2, 1,
+        0, 3, 2
+    };
+
+    m_planeIndexCount = 6;
+
+    // Store the vertex data
+    for (int i = 0; i < 4; i++) {
+      planeMesh.m_vertex.push_back(planeVertices[i]);
+    }
+    // Store the index data
+    for (int i = 0; i < 6; i++) {
+      planeMesh.m_index.push_back(planeIndices[i]);
+    }
+
+    // Cargar la textura
+    hr = m_PlaneTexture.init(m_device, "Textures/Default", DDS);
+    if (FAILED(hr)) {
+      ERROR("Main", "InitDevice",
+        ("Failed to initialize DrakePistol Texture. HRESULT: " + std::to_string(hr)).c_str());
+      return hr;
+    }
+    std::vector<MeshComponent> PlaneMeshes;
+    PlaneMeshes.push_back(planeMesh);
+    std::vector<Texture> PlaneTextures;
+    PlaneTextures.push_back(m_PlaneTexture);
+    m_APlane->setMesh(m_device, PlaneMeshes);
+    m_APlane->setTextures(PlaneTextures);
+
+    m_APlane->getComponent<Transform>()->setPosition(EngineUtilities::Vector3(0.0f, -5.0f, 0.0f));
+    m_APlane->getComponent<Transform>()->setRotation(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
+    m_APlane->getComponent<Transform>()->setScale(EngineUtilities::Vector3(20.0f, 1.0f, 20.0f));
+    m_actors.push_back(m_APlane);
+  }
+  else {
+    ERROR("Main", "InitDevice", "Failed to create Plane Actor.");
+    return E_FAIL;
   }
 
   // Establecer topología primitiva
-  m_deviceContext.m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  //m_deviceContext.m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
   // Crear los constant buffers
   hr = m_neverChanges.init(m_device, sizeof(CBNeverChanges));
@@ -125,28 +188,21 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-  hr = m_changeEveryFrame.init(m_device, sizeof(CBChangesEveryFrame));
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize ChangesEveryFrame Buffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
-  // Cargar la textura
-  hr = m_drakePistolTexture.init(m_device, "Textures/GunAlbedo",DDS);
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize DrakePistol Texture. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-	}
+  //hr = m_changeEveryFrame.init(m_device, sizeof(CBChangesEveryFrame));
+  //if (FAILED(hr)) {
+  //  ERROR("Main", "InitDevice",
+  //    ("Failed to initialize ChangesEveryFrame Buffer. HRESULT: " + std::to_string(hr)).c_str());
+  //  return hr;
+  //}
+    
 
   // Plane Default Texture
-	hr = m_defaultTexture.init(m_device, "Textures/Default", PNG);
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Default Texture. HRESULT: " + std::to_string(hr)).c_str());
-		return hr;
-	}
+	//hr = m_defaultTexture.init(m_device, "Textures/Default", PNG);
+  //if (FAILED(hr)) {
+  //  ERROR("Main", "InitDevice",
+  //    ("Failed to initialize Default Texture. HRESULT: " + std::to_string(hr)).c_str());
+	//	return hr;
+	//}
   
   // Crear el sampler state
   D3D11_SAMPLER_DESC sampDesc;
@@ -174,54 +230,31 @@ HRESULT BaseApp::init()
   cbChangesOnResize.mProjection = XMMatrixTranspose(m_Projection);
 
   //------- CREACIÓN DE GEOMETRÍA DEL PLANO (suelo) -------//
-  SimpleVertex planeVertices[] =
-  {
-      { XMFLOAT3(-20.0f, 0.0f, -20.0f), XMFLOAT2(0.0f, 0.0f) },
-      { XMFLOAT3(20.0f, 0.0f, -20.0f), XMFLOAT2(1.0f, 0.0f) },
-      { XMFLOAT3(20.0f, 0.0f,  20.0f), XMFLOAT2(1.0f, 1.0f) },
-      { XMFLOAT3(-20.0f, 0.0f,  20.0f), XMFLOAT2(0.0f, 1.0f) },
-  };
-
-  WORD planeIndices[] =
-  {
-      0, 2, 1,
-      0, 3, 2
-  };
-
-  m_planeIndexCount = 6;
-
-  // Store the vertex data
-  for (int i = 0; i < 4; i++) {
-    planeMesh.m_vertex.push_back(planeVertices[i]);
-  }
-  // Store the index data
-  for (int i = 0; i < 6; i++) {
-    planeMesh.m_index.push_back(planeIndices[i]);
-  }
+  
 
   // Crear el vertex buffer y index buffer para el plano
-  hr = m_planeVertexBuffer.init(m_device, planeMesh, D3D11_BIND_VERTEX_BUFFER);
-
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize PlaneVertexBuffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
-  hr = m_planeIndexBuffer.init(m_device, planeMesh, D3D11_BIND_INDEX_BUFFER);
-
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize PlaneIndexBuffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
-  hr = m_constPlane.init(m_device, sizeof(CBChangesEveryFrame));
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Plane Buffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
+  //hr = m_planeVertexBuffer.init(m_device, planeMesh, D3D11_BIND_VERTEX_BUFFER);
+  //
+  //if (FAILED(hr)) {
+  //  ERROR("Main", "InitDevice",
+  //    ("Failed to initialize PlaneVertexBuffer. HRESULT: " + std::to_string(hr)).c_str());
+  //  return hr;
+  //}
+  //
+  //hr = m_planeIndexBuffer.init(m_device, planeMesh, D3D11_BIND_INDEX_BUFFER);
+  //
+  //if (FAILED(hr)) {
+  //  ERROR("Main", "InitDevice",
+  //    ("Failed to initialize PlaneIndexBuffer. HRESULT: " + std::to_string(hr)).c_str());
+  //  return hr;
+  //}
+  //
+  //hr = m_constPlane.init(m_device, sizeof(CBChangesEveryFrame));
+  //if (FAILED(hr)) {
+  //  ERROR("Main", "InitDevice",
+  //    ("Failed to initialize Plane Buffer. HRESULT: " + std::to_string(hr)).c_str());
+  //  return hr;
+  //}
 
   //------- COMPILAR SHADER DE SOMBRA -------//
   hr = m_shaderShadow.CreateShader(m_device, PIXEL_SHADER, "HybridEngine.fx");
@@ -268,7 +301,8 @@ void
 BaseApp::update() {
 	m_userInterface.update();
 	bool show_demo_window = true;
-	ImGui::ShowDemoWindow(&show_demo_window);
+	//ImGui::ShowDemoWindow(&show_demo_window);
+  m_userInterface.inspectorGeneral(m_actors[1]);
 
   // Actualizar tiempo (mismo que antes)
   static float t = 0.0f;
@@ -294,49 +328,54 @@ BaseApp::update() {
 
   // --- Transformación del cubo ---
   // Parámetros del cubo:
-  float cubePosX = 0.0f, cubePosY = 2.0f, cubePosZ = 0.0f;  // Ubicado 2 unidades arriba
-  float cubeScale = 1.0f;                                    // Escala uniforme
-  float cubeAngleX = 0.0f, cubeAngleY = t, cubeAngleZ = 0.0f;  // Rotación dinámica en Y
-
-  // Crear las matrices individuales
-  XMMATRIX cubeScaleMat = XMMatrixScaling(cubeScale, cubeScale, cubeScale);
-  XMMATRIX cubeRotMat = XMMatrixRotationX(cubeAngleX) *
-    XMMatrixRotationY(cubeAngleY) *
-    XMMatrixRotationZ(cubeAngleZ);
-  XMMATRIX cubeTransMat = XMMatrixTranslation(cubePosX, cubePosY, cubePosZ);
+  //float cubePosX = 0.0f, cubePosY = 2.0f, cubePosZ = 0.0f;  // Ubicado 2 unidades arriba
+  //float cubeScale = 1.0f;                                    // Escala uniforme
+  //float cubeAngleX = 0.0f, cubeAngleY = t, cubeAngleZ = 0.0f;  // Rotación dinámica en Y
+  //
+  //// Crear las matrices individuales
+  //XMMATRIX cubeScaleMat = XMMatrixScaling(cubeScale, cubeScale, cubeScale);
+  //XMMATRIX cubeRotMat = XMMatrixRotationX(cubeAngleX) *
+  //  XMMatrixRotationY(cubeAngleY) *
+  //  XMMatrixRotationZ(cubeAngleZ);
+  //XMMATRIX cubeTransMat = XMMatrixTranslation(cubePosX, cubePosY, cubePosZ);
 
   // Combinar: primero escala, luego rota y por último traslada
-  m_World = cubeTransMat * cubeRotMat * cubeScaleMat;
+  //m_World = cubeTransMat * cubeRotMat * cubeScaleMat;
 
   // Actualizar el color animado del cub
 
   // --- Transformación del plano ---
   // Parámetros para el plano:
-  float planePosX = 0.0f, planePosY = -5.0f, planePosZ = 0.0f;
-  // Aunque los vértices ya definen un plano extenso (-20 a 20), aquí puedes ajustar el escalado adicional
-  float planeScaleFactor = 1.0f; // Puedes modificar este factor para agrandar o reducir el plano
-  float planeAngleX = 0.0f, planeAngleY = 0.0f, planeAngleZ = 0.0f; // Sin rotación por defecto
+  //float planePosX = 0.0f, planePosY = -5.0f, planePosZ = 0.0f;
+  //// Aunque los vértices ya definen un plano extenso (-20 a 20), aquí puedes ajustar el escalado adicional
+  //float planeScaleFactor = 1.0f; // Puedes modificar este factor para agrandar o reducir el plano
+  //float planeAngleX = 0.0f, planeAngleY = 0.0f, planeAngleZ = 0.0f; // Sin rotación por defecto
+  //
+  //XMMATRIX planeScaleMat = XMMatrixScaling(planeScaleFactor, planeScaleFactor, planeScaleFactor);
+  //XMMATRIX planeRotMat = XMMatrixRotationX(planeAngleX) *
+  //  XMMatrixRotationY(planeAngleY) *
+  //  XMMatrixRotationZ(planeAngleZ);
+  //XMMATRIX planeTransMat = XMMatrixTranslation(planePosX, planePosY, planePosZ);
+  //
+  //// Combinar transformaciones para el plano
+  //m_PlaneWorld = planeTransMat * planeRotMat * planeScaleMat;
+  //
+  //
+  //// Update Plane
+  //cbPlane.mWorld = XMMatrixTranspose(m_PlaneWorld);
+  //cbPlane.vMeshColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+  //m_constPlane.update(m_deviceContext, nullptr, 0, nullptr, &cbPlane, 0, 0);
 
-  XMMATRIX planeScaleMat = XMMatrixScaling(planeScaleFactor, planeScaleFactor, planeScaleFactor);
-  XMMATRIX planeRotMat = XMMatrixRotationX(planeAngleX) *
-    XMMatrixRotationY(planeAngleY) *
-    XMMatrixRotationZ(planeAngleZ);
-  XMMATRIX planeTransMat = XMMatrixTranslation(planePosX, planePosY, planePosZ);
-
-  // Combinar transformaciones para el plano
-  m_PlaneWorld = planeTransMat * planeRotMat * planeScaleMat;
-
-
-  // Update Plane
-  cbPlane.mWorld = XMMatrixTranspose(m_PlaneWorld);
-  cbPlane.vMeshColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-  m_constPlane.update(m_deviceContext, nullptr, 0, nullptr, &cbPlane, 0, 0);
+	// Update Drake Pistol Actor
+  for (auto& actor : m_actors) {
+    actor->update(0, m_deviceContext);
+  }
 
   // Update cube
-  m_vMeshColor = XMFLOAT4(1,1,1,1);
-  cb.mWorld = XMMatrixTranspose(m_World);
-  cb.vMeshColor = m_vMeshColor;
-  m_changeEveryFrame.update(m_deviceContext, nullptr, 0, nullptr, &cb, 0, 0);
+  //m_vMeshColor = XMFLOAT4(1,1,1,1);
+  //cb.mWorld = XMMatrixTranspose(m_World);
+  //cb.vMeshColor = m_vMeshColor;
+  //m_changeEveryFrame.update(m_deviceContext, nullptr, 0, nullptr, &cb, 0, 0);
 
   // Update Shadow cube
   float dot = m_LightPos.y;
@@ -372,29 +411,32 @@ BaseApp::render() {
   m_neverChanges.render(m_deviceContext, 0, 1);
   m_changeOnResize.render(m_deviceContext, 1, 1);
   // Asignar buffers Vertex e Index
-  m_planeVertexBuffer.render(m_deviceContext, 0, 1);
-  m_planeIndexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
+  //m_planeVertexBuffer.render(m_deviceContext, 0, 1);
+  //m_planeIndexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
 
   // Asignar buffers constantes
-  m_constPlane.render(m_deviceContext, 2, 1);
-  m_constPlane.render(m_deviceContext, 2, 1, true);
-
-  m_defaultTexture.render(m_deviceContext, 0, 1);
-  m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
-  m_deviceContext.m_deviceContext->DrawIndexed(planeMesh.m_index.size(), 0, 0);
+  //m_constPlane.render(m_deviceContext, 2, 1);
+  //m_constPlane.render(m_deviceContext, 2, 1, true);
+  //
+  //m_defaultTexture.render(m_deviceContext, 0, 1);
+  //m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
+  //m_deviceContext.m_deviceContext->DrawIndexed(planeMesh.m_index.size(), 0, 0);
 
   //------------- Renderizar la Pistola-------------//
+  for(auto& actor : m_actors) {
+    actor->render(m_deviceContext);
+	}
   // Asignar buffers Vertex e Index
-  m_vertexBuffer.render(m_deviceContext, 0, 1);
-  m_indexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
-
-  // Asignar buffers constantes
-  m_changeEveryFrame.render(m_deviceContext, 2, 1);
-  m_changeEveryFrame.render(m_deviceContext, 2, 1, true);
-
-  m_drakePistolTexture.render(m_deviceContext, 0, 1);
-  m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
-  m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
+  //m_vertexBuffer.render(m_deviceContext, 0, 1);
+  //m_indexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
+  //
+  //// Asignar buffers constantes
+  //m_changeEveryFrame.render(m_deviceContext, 2, 1);
+  //m_changeEveryFrame.render(m_deviceContext, 2, 1, true);
+  //
+  //m_drakePistolTexture.render(m_deviceContext, 0, 1);
+  //m_deviceContext.m_deviceContext->PSSetSamplers(0, 1, &m_pSamplerLinear);
+  //m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
 
   //------------- Renderizar la sombra del cubo -------------//
   m_shaderShadow.render(m_deviceContext, PIXEL_SHADER);
@@ -409,7 +451,7 @@ BaseApp::render() {
   // Asignar buffers constantes
   m_constShadow.render(m_deviceContext, 2, 1, true);
 
-  m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
+  //m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
 
   m_shadowBlendState.render(m_deviceContext, blendFactor, 0xffffffff, true);
   m_shadowDepthStencilState.render(m_deviceContext, 0, true);
@@ -430,17 +472,18 @@ BaseApp::destroy() {
   m_shadowDepthStencilState.destroy();
   m_shaderShadow.destroy();
 
-  m_planeVertexBuffer.destroy();
-  m_planeIndexBuffer.destroy();
+  //m_planeVertexBuffer.destroy();
+  //m_planeIndexBuffer.destroy();
 
   if (m_pSamplerLinear) m_pSamplerLinear->Release();
-	m_drakePistolTexture.destroy();
-  m_defaultTexture.destroy();
+	//m_drakePistolTexture.destroy();
+  //m_defaultTexture.destroy();
 
   m_neverChanges.destroy();
   m_changeOnResize.destroy();
-  m_changeEveryFrame.destroy();
-  m_constPlane.destroy();
+
+  //m_changeEveryFrame.destroy();
+  //m_constPlane.destroy();
   m_constShadow.destroy();
 
   m_vertexBuffer.destroy();
