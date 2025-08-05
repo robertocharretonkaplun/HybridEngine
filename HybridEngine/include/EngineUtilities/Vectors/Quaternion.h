@@ -30,7 +30,7 @@
 
 #include "Utilities/EngineMath.h"
 #include "Vector3.h"
-namespace EngineUtilities {
+namespace EU {
 	/**
  * @brief A quaternion class.
  *
@@ -134,7 +134,7 @@ namespace EngineUtilities {
 		 * @return The magnitude of the quaternion.
 		 */
 		float magnitude() const {
-			return EngineUtilities::sqrt(w * w + x * x + y * y + z * z);
+			return EU::sqrt(w * w + x * x + y * y + z * z);
 		}
 
 		/**
@@ -194,9 +194,9 @@ namespace EngineUtilities {
 		 */
 		static Quaternion fromAxisAngle(const Vector3& axis, float angle) {
 			float halfAngle = angle * 0.5f;
-			float sinHalfAngle = EngineUtilities::sin(halfAngle);
+			float sinHalfAngle = EU::sin(halfAngle);
 			return Quaternion(
-				EngineUtilities::cos(halfAngle),
+				EU::cos(halfAngle),
 				axis.x * sinHalfAngle,
 				axis.y * sinHalfAngle,
 				axis.z * sinHalfAngle

@@ -54,55 +54,32 @@ private:
 	DepthStencilView m_depthStencilView;
 	Viewport m_viewport;
 	ShaderProgram m_shaderProgram;
-	ShaderProgram m_shaderShadow;
-	BlendState m_shadowBlendState;
-	DepthStencilState m_shadowDepthStencilState;
 	ModelLoader m_modelLoader;
 	// Camera Buffers
 	Buffer m_neverChanges;
 	Buffer m_changeOnResize;
 
-	// Cube Buffers
-	Buffer m_vertexBuffer;
-	Buffer m_indexBuffer;
-	//Buffer m_changeEveryFrame;
-
-	// Cube Shadow Buffers
-	Buffer m_constShadow;
-
-	// Plane Buffers
-	//Buffer m_planeVertexBuffer;
-	//Buffer m_planeIndexBuffer;
-	//Buffer m_constPlane;
-
 	// Variable global para el constant buffer de la luz puntual
 	Texture m_drakePistolTexture;
 	Texture m_PlaneTexture;
-	ID3D11SamplerState* m_pSamplerLinear = NULL;
-	XMMATRIX                            m_World;         // Para el cubo
-	XMMATRIX                            m_PlaneWorld;    // Para el plano
 	XMMATRIX                            m_View;
 	XMMATRIX                            m_Projection;
-	XMFLOAT4                            m_vMeshColor;
 
 	//----- Variables agregadas para el plano y sombras -----//
 	UINT                                m_planeIndexCount = 0;
 	XMFLOAT4                            m_LightPos; // Posición de la luz(2.0f, 4.0f, -2.0f, 1.0f)
 
 	float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	float blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-	//MeshComponent cubeMesh;
+
 	MeshComponent DrakePistol;
 	MeshComponent planeMesh;
+
 	CBNeverChanges cbNeverChanges;
 	CBChangeOnResize cbChangesOnResize;
-	//CBChangesEveryFrame cbPlane;
-	//CBChangesEveryFrame cb;
-	CBChangesEveryFrame cbShadow;
 	UserInterface												m_userInterface;
 
-	EngineUtilities::TSharedPointer<Actor> m_ADrakePistol;
-	EngineUtilities::TSharedPointer<Actor> m_APlane;
-	std::vector< EngineUtilities::TSharedPointer<Actor>> m_actors;
+	EU::TSharedPointer<Actor> m_ADrakePistol;
+	EU::TSharedPointer<Actor> m_APlane;
+	std::vector< EU::TSharedPointer<Actor>> m_actors;
 
 };

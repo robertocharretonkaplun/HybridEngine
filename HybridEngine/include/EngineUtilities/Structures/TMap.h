@@ -27,7 +27,7 @@
  * SOFTWARE.
 */
 #pragma once
-namespace EngineUtilities {
+namespace EU {
 	/**
 	 * @brief TMap es una clase de mapa (diccionario) dinámica para almacenar pares clave-valor.
 	 *

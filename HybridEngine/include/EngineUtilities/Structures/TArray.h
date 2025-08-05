@@ -28,7 +28,7 @@
 */
 
 #pragma once
-namespace EngineUtilities {
+namespace EU {
 	/**
 	 * @brief TArray es una clase de array dinámica para almacenar elementos de tipo T.
 	 *

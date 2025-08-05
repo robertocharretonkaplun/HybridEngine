@@ -22,9 +22,9 @@ Transform::update(float deltaTime) {
 }
 
 void 
-Transform::setTransform(const EngineUtilities::Vector3& newPos, 
-												const EngineUtilities::Vector3& newRot, 
-												const EngineUtilities::Vector3& newSca) { 
+Transform::setTransform(const EU::Vector3& newPos, 
+												const EU::Vector3& newRot, 
+												const EU::Vector3& newSca) { 
 	position = newPos;
 	rotation = newRot;
 	scale = newSca;

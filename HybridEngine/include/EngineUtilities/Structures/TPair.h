@@ -28,7 +28,7 @@
 */
 #pragma once
 
-namespace EngineUtilities {
+namespace EU {
 #pragma once
 #include <iostream>
 

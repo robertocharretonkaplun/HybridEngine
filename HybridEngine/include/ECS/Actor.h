@@ -4,6 +4,11 @@
 #include "Buffer.h"
 #include "Texture.h"
 #include "Transform.h"
+#include "SamplerState.h"
+#include "Rasterizer.h"
+#include "BlendState.h"
+#include "ShaderProgram.h"
+#include "DepthStencilState.h"
 
 class device;
 class MeshComponent;
@@ -79,13 +84,38 @@ public:
     m_textures = textures;
   }
 
+  void 
+  setCastShadow(bool v) { 
+    castShadow = v; 
+  }
+  
+  bool 
+  canCastShadow() const { 
+    return castShadow; 
+  }
+  
+  void 
+  renderShadow(DeviceContext& deviceContext);
+
 private:
   std::vector<MeshComponent> m_meshes;  ///< Vector de componentes de malla.
   std::vector<Texture> m_textures;      ///< Vector de texturas.
   std::vector<Buffer> m_vertexBuffers;  ///< Buffers de vértices.
   std::vector<Buffer> m_indexBuffers;   ///< Buffers de índices.
+  BlendState m_blendstate;
+  Rasterizer m_rasterizer;
+  SamplerState m_sampler;
   CBChangesEveryFrame m_model;          ///< Constante del buffer para cambios en cada frame.
   Buffer m_modelBuffer;                 ///< Buffer del modelo.
+
+  // Shadows
+  ShaderProgram m_shaderShadow;
+  Buffer m_shaderBuffer;
+  BlendState m_shadowBlendState;
+  DepthStencilState m_shadowDepthStencilState;
+  CBChangesEveryFrame m_cbShadow;
+
+  XMFLOAT4                            m_LightPos;
   std::string m_name = "Actor";         ///< Nombre del actor.
-	bool castShadow = false;              ///< Indica si el actor proyecta sombras.
+	bool castShadow = true;              ///< Indica si el actor proyecta sombras.
 };

@@ -50,7 +50,7 @@ public:
    * @param component Puntero compartido al componente que se va a agregar.
    */
   template <typename T> void 
-  addComponent(EngineUtilities::TSharedPointer<T> component) {
+  addComponent(EU::TSharedPointer<T> component) {
     static_assert(std::is_base_of<Component, T>::value, "T must be derived from Component");
     m_components.push_back(component.template dynamic_pointer_cast<Component>());
   }
@@ -61,19 +61,19 @@ public:
    * @return Puntero compartido al componente si se encuentra, nullptr en caso contrario.
 	 */
   template<typename T>
-  EngineUtilities::TSharedPointer<T>
+  EU::TSharedPointer<T>
   getComponent() {
     for (auto& component : m_components) {
-      EngineUtilities::TSharedPointer<T> specificComponent = component.template dynamic_pointer_cast<T>();
+      EU::TSharedPointer<T> specificComponent = component.template dynamic_pointer_cast<T>();
       if (specificComponent) {
         return specificComponent;
       }
     }
-    return EngineUtilities::TSharedPointer<T>();
+    return EU::TSharedPointer<T>();
   }
 private:
 protected:
   bool m_isActive;
   int m_id;
-  std::vector<EngineUtilities::TSharedPointer<Component>> m_components;
+  std::vector<EU::TSharedPointer<Component>> m_components;
 };

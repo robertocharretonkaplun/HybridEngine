@@ -34,45 +34,45 @@ public:
 
   // Métodos de acceso a los datos de posición
   // Retorna la posición actual
-  const EngineUtilities::Vector3&
+  const EU::Vector3&
   getPosition() const { return position; }
 
   // Establece una nueva posición
   void 
-  setPosition(const EngineUtilities::Vector3& newPos) { position = newPos; }
+  setPosition(const EU::Vector3& newPos) { position = newPos; }
 
   // Métodos de acceso a los datos de rotación
   // Retorna la rotación actual
-  const EngineUtilities::Vector3&
+  const EU::Vector3&
   getRotation() const { return rotation; }
 
   // Establece una nueva rotación
   void 
-  setRotation(const EngineUtilities::Vector3& newRot) { rotation = newRot; }
+  setRotation(const EU::Vector3& newRot) { rotation = newRot; }
 
   // Métodos de acceso a los datos de escala
   // Retorna la escala actual
-  const EngineUtilities::Vector3&
+  const EU::Vector3&
   getScale() const { return scale; }
 
   // Establece una nueva escala
   void 
-  setScale(const EngineUtilities::Vector3& newScale) { scale = newScale; }
+  setScale(const EU::Vector3& newScale) { scale = newScale; }
 
   void
-  setTransform(const EngineUtilities::Vector3& newPos, 
-               const EngineUtilities::Vector3& newRot,
-               const EngineUtilities::Vector3& newSca);
+  setTransform(const EU::Vector3& newPos, 
+               const EU::Vector3& newRot,
+               const EU::Vector3& newSca);
 
   // Método para trasladar la posición del objeto
   // @param translation: Vector que representa la cantidad de traslado en cada eje
   void 
-  translate(const EngineUtilities::Vector3& translation);
+  translate(const EU::Vector3& translation);
 
 private:
-  EngineUtilities::Vector3 position;  // Posición del objeto
-  EngineUtilities::Vector3 rotation;  // Rotación del objeto
-  EngineUtilities::Vector3 scale;     // Escala del objeto
+  EU::Vector3 position;  // Posición del objeto
+  EU::Vector3 rotation;  // Rotación del objeto
+  EU::Vector3 scale;     // Escala del objeto
 
 public:
   XMMATRIX matrix;    // Matriz de transformación

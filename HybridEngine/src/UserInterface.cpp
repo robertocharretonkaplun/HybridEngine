@@ -83,6 +83,8 @@ UserInterface::init(void* window, ID3D11Device* device, ID3D11DeviceContext* dev
 
 	// Init ToolTips
 	toolTipData();
+
+	selectedActorIndex = 0;
 }
 
 void
@@ -297,7 +299,7 @@ UserInterface::Renderer(Window window, ID3D11ShaderResourceView* renderTexture) 
 //}
 
 void
-UserInterface::inspectorGeneral(EngineUtilities::TSharedPointer<Actor> actor) {
+UserInterface::inspectorGeneral(EU::TSharedPointer<Actor> actor) {
 	ImGui::Begin("Inspector");
 	// Checkbox para Static
 	bool isStatic = false;
@@ -339,7 +341,7 @@ UserInterface::inspectorGeneral(EngineUtilities::TSharedPointer<Actor> actor) {
 }
 
 void
-UserInterface::inspectorContainer(EngineUtilities::TSharedPointer<Actor> actor) {
+UserInterface::inspectorContainer(EU::TSharedPointer<Actor> actor) {
 	//ImGui::Begin("Transform");
 	// Draw the structure
 	vec3Control("Position", const_cast<float*>(actor->getComponent<Transform>()->getPosition().data()));
@@ -800,5 +802,51 @@ UserInterface::RenderFullScreenTransparentWindow() {
 
 	ImGui::Begin("FullScreenTransparentWindow", NULL, window_flags);
 	// Puedes agregar contenido aquí si lo necesitas
+	ImGui::End();
+}
+
+void 
+UserInterface::outliner(const std::vector<EU::TSharedPointer<Actor>>& actors) {
+	ImGui::Begin("Hierarchy");
+
+	// Barra de búsqueda
+	static ImGuiTextFilter filter;
+	filter.Draw("Search...", 180.0f); // Barra de búsqueda con ancho ajustable
+
+	ImGui::Separator();
+
+	// Recorrer y mostrar cada actor que pase el filtro de búsqueda
+	for (int i = 0; i < actors.size(); ++i) {
+		const auto& actor = actors[i];
+
+		// Obtener el nombre del actor o asignar un nombre genérico
+		std::string actorName = actor ? actor->getName() : "Unnamed Actor";
+
+		// Verificar si el actor pasa el filtro de búsqueda
+		if (!filter.PassFilter(actorName.c_str())) {
+			continue; // Saltar actores que no coincidan con el filtro
+		}
+
+		// Si el actor es seleccionable
+		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		if (selectedActorIndex == i)
+			flags |= ImGuiTreeNodeFlags_Selected;
+
+		// Crear un nodo de árbol para cada actor
+		bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)i, flags, "%s", actorName.c_str());
+
+		// Selección de actor
+		if (ImGui::IsItemClicked()) {
+			selectedActorIndex = i;
+			// Aquí puedes llamar a alguna función para mostrar los detalles del actor en otra ventana
+		}
+
+		// Mostrar nodos hijos si el nodo está abierto
+		if (nodeOpen) {
+			//ImGui::Text("Position: %.2f, %.2f, %.2f", actor->getPosition().x, actor->getPosition().y, actor->getPosition().z);
+			ImGui::TreePop();
+		}
+	}
+
 	ImGui::End();
 }

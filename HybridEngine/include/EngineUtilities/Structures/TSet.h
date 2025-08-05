@@ -28,7 +28,7 @@
 */
 #pragma once
 
-namespace EngineUtilities {
+namespace EU {
 	/**
 	 * @brief TSet es una clase de conjunto dinámica para almacenar elementos únicos.
 	 *

@@ -27,7 +27,7 @@
  * SOFTWARE.
 */
 #pragma once
-namespace EngineUtilities {
+namespace EU {
   /**
  * @brief A 2x2 matrix class.
  *

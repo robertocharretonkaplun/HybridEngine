@@ -197,6 +197,12 @@
     <ClInclude Include="include\ECS\Transform.h">
       <Filter>include\ECS</Filter>
     </ClInclude>
+    <ClInclude Include="include\Rasterizer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SamplerState.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HybridEngine.cpp" />
@@ -276,6 +282,12 @@
       <Filter>source</Filter>
     </ClCompile>
     <ClCompile Include="src\ECS\Transform.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rasterizer.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SamplerState.cpp">
       <Filter>source</Filter>
     </ClCompile>
   </ItemGroup>

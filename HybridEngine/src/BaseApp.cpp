@@ -88,7 +88,7 @@ HRESULT BaseApp::init()
   }
 
   // Set Drake Pistol Actor
-  m_ADrakePistol = EngineUtilities::MakeShared<Actor>(m_device);
+  m_ADrakePistol = EU::MakeShared<Actor>(m_device);
 
   if (!m_ADrakePistol.isNull()) {
     // Crear vertex buffer y index buffer para el pistol
@@ -109,16 +109,17 @@ HRESULT BaseApp::init()
     m_ADrakePistol->setTextures(DrakePistolTextures);
 
 		m_actors.push_back(m_ADrakePistol);
-    m_ADrakePistol->getComponent<Transform>()->setPosition(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
-    m_ADrakePistol->getComponent<Transform>()->setRotation(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
-    m_ADrakePistol->getComponent<Transform>()->setScale(EngineUtilities::Vector3(1.0f, 1.0f, 1.0f));
+    m_ADrakePistol->getComponent<Transform>()->setTransform(EU::Vector3(0.0f, 1.7f, 0.0f),
+                                                            EU::Vector3(0.0f, 1.5f, 0.0f),
+                                                            EU::Vector3(1.0f, 1.0f, 1.0f));
+    m_ADrakePistol->setCastShadow(false);
   } else {
     ERROR("Main", "InitDevice", "Failed to create Drake Pistol Actor.");
 		return E_FAIL;
   }
 
   // Set Plane Actor
-  m_APlane = EngineUtilities::MakeShared<Actor>(m_device);
+  m_APlane = EU::MakeShared<Actor>(m_device);
   
   if (!m_APlane.isNull()) {
     SimpleVertex planeVertices[] =
@@ -134,8 +135,6 @@ HRESULT BaseApp::init()
         0, 2, 1,
         0, 3, 2
     };
-
-    m_planeIndexCount = 6;
 
     // Store the vertex data
     for (int i = 0; i < 4; i++) {
@@ -163,9 +162,10 @@ HRESULT BaseApp::init()
     m_APlane->setMesh(m_device, PlaneMeshes);
     m_APlane->setTextures(PlaneTextures);
 
-    m_APlane->getComponent<Transform>()->setPosition(EngineUtilities::Vector3(0.0f, -5.0f, 0.0f));
-    m_APlane->getComponent<Transform>()->setRotation(EngineUtilities::Vector3(0.0f, 0.0f, 0.0f));
-    m_APlane->getComponent<Transform>()->setScale(EngineUtilities::Vector3(1.0f, 1.0f, 1.0f));
+    m_APlane->getComponent<Transform>()->setTransform(EU::Vector3(0.0f, -5.0f, 0.0f),
+                                                      EU::Vector3(0.0f, 0.0f, 0.0f),
+                                                      EU::Vector3(1.0f, 1.0f, 1.0f));
+    m_APlane->setCastShadow(false);
     m_actors.push_back(m_APlane);
   }
   else {
@@ -188,20 +188,6 @@ HRESULT BaseApp::init()
     return hr;
   }
 
-  // Crear el sampler state
-  D3D11_SAMPLER_DESC sampDesc;
-  ZeroMemory(&sampDesc, sizeof(sampDesc));
-  sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-  sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-  sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-  sampDesc.MinLOD = 0;
-  sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-  hr = m_device.CreateSamplerState(&sampDesc, &m_pSamplerLinear);
-  if (FAILED(hr))
-    return hr;
-
   // Inicializar las matrices de mundo, vista y proyección
   XMVECTOR Eye = XMVectorSet(0.0f, 3.0f, -6.0f, 0.0f);
   XMVECTOR At = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -212,39 +198,6 @@ HRESULT BaseApp::init()
   cbNeverChanges.mView = XMMatrixTranspose(m_View);
   m_Projection = XMMatrixPerspectiveFovLH(XM_PIDIV4, m_window.m_width / (FLOAT)m_window.m_height, 0.01f, 100.0f);
   cbChangesOnResize.mProjection = XMMatrixTranspose(m_Projection);
-
-
-  //------- COMPILAR SHADER DE SOMBRA -------//
-  hr = m_shaderShadow.CreateShader(m_device, PIXEL_SHADER, "HybridEngine.fx");
-
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Shadow Shader. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
-  hr = m_constShadow.init(m_device, sizeof(CBChangesEveryFrame));
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Shadow Buffer. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-  //------- CREAR ESTADOS DE BLENDING Y DEPTH STENCIL PARA LAS SOMBRAS -------//
-  hr = m_shadowBlendState.init(m_device);
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Shadow Blend State. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
-  hr = m_shadowDepthStencilState.init(m_device, true, false);
-
-  if (FAILED(hr)) {
-    ERROR("Main", "InitDevice",
-      ("Failed to initialize Depth Stencil State. HRESULT: " + std::to_string(hr)).c_str());
-    return hr;
-  }
-
 
 	m_LightPos = XMFLOAT4(2.0f, 4.0f, -2.0f, 1.0f); // Posición de la luz
 	// Initialize User Interface
@@ -259,8 +212,9 @@ void
 BaseApp::update() {
 	m_userInterface.update();
 	bool show_demo_window = true;
-	//ImGui::ShowDemoWindow(&show_demo_window);
-  m_userInterface.inspectorGeneral(m_actors[0]);
+
+  m_userInterface.inspectorGeneral(m_actors[m_userInterface.selectedActorIndex]);
+  m_userInterface.outliner(m_actors);
 
   // Actualizar tiempo (mismo que antes)
   static float t = 0.0f;
@@ -287,21 +241,6 @@ BaseApp::update() {
   for (auto& actor : m_actors) {
     actor->update(0, m_deviceContext);
   }
-
-  // Update Shadow cube
-  float dot = m_LightPos.y;
-  XMMATRIX shadowMatrix = XMMATRIX(
-    dot, -m_LightPos.x, 0.0f, 0.0f,
-    0.0f, 0.0f, 0.0f, 0.0f,
-    0.0f, -m_LightPos.z, dot, 0.0f,
-    0.0f, -1.0f, 0.0f, dot
-  );
-  XMMATRIX shadowWorld = m_World * shadowMatrix;
-  cbShadow.mWorld = XMMatrixTranspose(shadowWorld);
-  cbShadow.vMeshColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
-  m_constShadow.update(m_deviceContext, nullptr, 0, nullptr, &cbShadow, 0, 0);
-
-
 }
 
 void 
@@ -317,8 +256,7 @@ BaseApp::render() {
   // Configurar los buffers y shaders para el pipeline
   m_shaderProgram.render(m_deviceContext);
 
-  //------------- Renderizar Plano-------------//
-  // Asignar buffers constantes
+  // Asignar buffers constantes Camera
   m_neverChanges.render(m_deviceContext, 0, 1);
   m_changeOnResize.render(m_deviceContext, 1, 1);
 
@@ -326,24 +264,6 @@ BaseApp::render() {
   for(auto& actor : m_actors) {
     actor->render(m_deviceContext);
 	}
-
-  //------------- Renderizar la sombra del cubo -------------//
-  m_shaderShadow.render(m_deviceContext, PIXEL_SHADER);
-
-  m_shadowBlendState.render(m_deviceContext, blendFactor, 0xffffffff);
-  m_shadowDepthStencilState.render(m_deviceContext, 0);
-
-  // Asignar buffers Vertex e Index
-  m_vertexBuffer.render(m_deviceContext, 0, 1);
-  m_indexBuffer.render(m_deviceContext, 0, 1, false, DXGI_FORMAT_R32_UINT);
-
-  // Asignar buffers constantes
-  m_constShadow.render(m_deviceContext, 2, 1, true);
-
-  //m_deviceContext.m_deviceContext->DrawIndexed(DrakePistol.m_index.size(), 0, 0);
-
-  m_shadowBlendState.render(m_deviceContext, blendFactor, 0xffffffff, true);
-  m_shadowDepthStencilState.render(m_deviceContext, 0, true);
 
 	// Renderizar la interfaz de usuario y mostrar la imagen
 	m_userInterface.render();
@@ -357,19 +277,9 @@ BaseApp::destroy() {
 	m_userInterface.destroy();
   if (m_deviceContext.m_deviceContext) m_deviceContext.m_deviceContext->ClearState();
 
-  m_shadowBlendState.destroy();
-  m_shadowDepthStencilState.destroy();
-  m_shaderShadow.destroy();
-
-  if (m_pSamplerLinear) m_pSamplerLinear->Release();
-
   m_neverChanges.destroy();
   m_changeOnResize.destroy();
 
-  m_constShadow.destroy();
-
-  m_vertexBuffer.destroy();
-  m_indexBuffer.destroy();
   m_shaderProgram.destroy();
   m_depthStencil.destroy();
   m_depthStencilView.destroy();

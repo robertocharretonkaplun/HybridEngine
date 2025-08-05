@@ -29,7 +29,7 @@
 #pragma once
 
 #include "Utilities/EngineMath.h"
-namespace EngineUtilities {
+namespace EU {
   /**
  * @brief A 4D vector class.
  *
@@ -99,7 +99,7 @@ namespace EngineUtilities {
      * @return The magnitude of the vector.
      */
     float magnitude() const {
-      return EngineUtilities::sqrt(x * x + y * y + z * z + w * w);
+      return EU::sqrt(x * x + y * y + z * z + w * w);
     }
 
     /**
